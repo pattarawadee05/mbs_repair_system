@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown เดียว
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือกเดี่ยว
     $location_data = explode('|', $_POST['building_room']);
     $building = $conn->real_escape_string($location_data[0]);
     $room_number = $conn->real_escape_string($location_data[1]);
@@ -40,51 +40,53 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #f4f7fc !important;
+            background: #e0f2fe !important;
+            background-image: radial-gradient(at 0% 0%, hsla(197,93%,88%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%) !important;
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
-            color: #4a5568;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px 0;
+            padding: 40px 0;
+            margin: 0;
         }
-        .mbs-card-container {
+        .mbs-new-box {
             width: 100%;
-            max-width: 440px;
-            background: #ffffff;
-            border-radius: 30px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            padding: 30px 25px;
+            max-width: 450px;
+            background: #ffffff !important;
+            border-radius: 30px !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
+            padding: 35px 25px !important;
         }
-        .mbs-logo-header {
+        .mbs-logo-section {
             text-align: center;
             margin-bottom: 25px;
             border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 20px;
+            padding-bottom: 15px;
         }
-        .mbs-logo-header img {
-            width: 90px;
-            height: 90px;
+        .mbs-logo-section img {
+            width: 85px;
+            height: 85px;
             object-fit: contain;
-            margin-bottom: 12px;
+            margin-bottom: 10px;
         }
-        .mbs-logo-header h2 {
+        .mbs-logo-section h2 {
             font-size: 20px;
             font-weight: 700;
-            color: #0f172a;
+            color: #0c2340;
             margin: 0;
         }
-        .mbs-logo-header p {
+        .mbs-logo-section p {
             font-size: 12px;
             color: #2563eb;
             margin: 4px 0 0 0;
         }
         .form-label {
-            font-weight: 500;
+            font-weight: 600;
             font-size: 13px;
-            color: #64748b;
-            margin-bottom: 8px;
+            color: #0c2340;
+            margin-bottom: 6px;
         }
         .form-control, .form-select {
             border: 1px solid #e2e8f0;
@@ -92,25 +94,48 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             padding: 12px 16px;
             font-size: 14px;
             background-color: #ffffff;
+            color: #334155;
         }
-        .btn-submit-mbs {
-            background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
+        .form-control:focus, .form-select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+        }
+        .btn-submit-gradient {
+            background: linear-gradient(90deg, #1d4ed8 0%, #0284c7 100%) !important;
             border: none;
-            border-radius: 20px;
+            border-radius: 15px;
             padding: 14px;
             font-size: 15px;
             font-weight: 600;
             color: white;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-            margin-top: 15px;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
             width: 100%;
+            margin-top: 15px;
+        }
+        .btn-submit-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        /* ตกแต่งแถวหัวข้อกลุ่มอาคารให้ดูสวย เด่น และอ่านง่าย */
+        optgroup {
+            font-weight: 700 !important;
+            color: #1e3a8a !important;
+            font-style: normal;
+            background: #f8fafc;
+            padding: 5px;
+        }
+        optgroup option {
+            font-weight: 400 !important;
+            color: #334155 !important;
+            background: #ffffff;
+            padding: 6px 12px;
         }
     </style>
 </head>
 <body>
 
-<div class="mbs-card-container">
-    <div class="mbs-logo-header">
+<div class="mbs-new-box">
+    <div class="mbs-logo-section">
         <img src="mbs-logo.png" alt="MBS Logo">
         <h2>MBS REPAIR</h2>
         <p>ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</p>
@@ -162,34 +187,54 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
         <div class="mb-3">
             <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
-            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
+            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-submit-mbs">ส่งข้อมูลแจ้งซ่อม</button>
+        <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
     </form>
 </div>
 
 <script>
-// ล็อกให้พิมพ์ได้เฉพาะตัวเลขในช่องเบอร์โทร
 document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// โดลดรายชื่อห้องทั้งหมดขึ้นมาแสดงใน Dropdown เดียว
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
+    
     fetch('get_rooms.php')
         .then(response => response.json())
         .then(data => {
+            // ล้างตัวเลือกเก่าออกก่อนเพื่อป้องกันการโหลดซ้ำซ้อน คืนค่าหน้าตาสวยงาม
+            locationSelect.innerHTML = '<option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>';
+
+            const groupACC = document.createElement('optgroup');
+            groupACC.label = '🏢 อาคาร ACC.BIZ';
+            
+            const groupSBS = document.createElement('optgroup');
+            groupSBS.label = '🏢 อาคาร SBS';
+
             data.forEach(room => {
                 const option = document.createElement('option');
                 option.value = `${room.building}|${room.room_number}|${room.room_type}`;
-                option.textContent = `${room.room_number} (${room.building})`;
-                locationSelect.appendChild(option);
+                
+                // แสดงรูปแบบผลลัพธ์ตามบรีฟ: ชื่อห้อง (ประเภทห้อง) เช่น ACC.BIZ301 (Com Lab)
+                option.textContent = `${room.room_number} (${room.room_type})`;
+
+                if (room.building === 'ตึก ACC.BIZ') {
+                    groupACC.appendChild(option);
+                } else if (room.building === 'ตึก SBS') {
+                    groupSBS.appendChild(option);
+                }
             });
-        });
+
+            locationSelect.appendChild(groupACC);
+            locationSelect.appendChild(groupSBS);
+        })
+        .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
 });
 
+document.getElementById('building_room');
 document.getElementById('locationSelect').addEventListener('change', function() {
     if(this.value) {
         const parts = this.value.split('|');

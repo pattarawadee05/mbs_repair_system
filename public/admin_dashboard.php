@@ -1,89 +1,246 @@
 <?php
-// public/admin_dashboard.php
+// public/add_repair.php
 include '../config.php';
-session_start();
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
-    header("Location: login.php");
-    exit();
+if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['action'] == 'repair')) {
+    $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
+    $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
+    $phone = $conn->real_escape_string($_POST['phone']);
+    
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown เดียวที่รวมกลุ่มไว้
+    $location_data = explode('|', $_POST['building_room']);
+    $building = $conn->real_escape_string($location_data[0]);
+    $room_number = $conn->real_escape_string($location_data[1]);
+    $room_type = $conn->real_escape_string($location_data[2]);
+    
+    $device_type = $conn->real_escape_string($_POST['device_type']);
+    $description = $conn->real_escape_string($_POST['description']);
+    $line_user_id = "LINE_MBS_" . uniqid(); 
+    
+    $department = "";
+    $file_name = null;
+
+    $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
+            VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
+    
+    if ($conn->query($sql) === TRUE) {
+        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว'); window.location.href='add_repair.php';</script>";
+    } else {
+        echo "<script>alert('เกิดข้อผิดพลาด: " . $conn->error . "');</script>";
+    }
 }
-
-if (isset($_POST['update_status'])) {
-    $id = intval($_POST['request_id']);
-    $status = $conn->real_escape_string($_POST['status']);
-    $notes = $conn->real_escape_string($_POST['technician_notes']);
-    $cost = floatval($_POST['repair_cost']);
-
-    $sql = "UPDATE repair_requests SET status='$status', technician_notes='$notes', repair_cost=$cost WHERE id=$id";
-    $conn->query($sql);
-    echo "<script>alert('อัปเดตสถานะงานเรียบร้อย'); window.location.href='admin_dashboard.php';</script>";
-}
-
-$sql = "SELECT * FROM repair_requests ORDER BY id DESC";
-$result = $conn->query($sql);
 ?>
 <!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <title>ส่วนจัดการสำหรับเจ้าหน้าที่เทคนิค (Admin)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>แจ้งซ่อมออนไลน์ - MBS REPAIR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
-    <style>body{ font-family: 'Sarabun', sans-serif; background-color: #f8fafc; }</style>
+    <style>
+        body {
+            background: #e0f2fe !important;
+            background-image: radial-gradient(at 0% 0%, hsla(197,93%,88%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%) !important;
+            min-height: 100vh;
+            font-family: 'Sarabun', sans-serif;
+            color: #1e3a8a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 0;
+            margin: 0;
+        }
+        .mbs-new-box {
+            width: 100%;
+            max-width: 450px;
+            background: #ffffff !important;
+            border-radius: 30px !important;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
+            padding: 35px 25px !important;
+        }
+        .mbs-logo-section {
+            text-align: center;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 15px;
+        }
+        .mbs-logo-section img {
+            width: 85px;
+            height: 85px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+        .mbs-logo-section h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #0c2340;
+            margin: 0;
+        }
+        .mbs-logo-section p {
+            font-size: 12px;
+            color: #2563eb;
+            margin: 4px 0 0 0;
+        }
+        .form-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #0c2340;
+            margin-bottom: 6px;
+        }
+        .form-control, .form-select {
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 12px 16px;
+            font-size: 14px;
+            background-color: #ffffff;
+            color: #334155;
+        }
+        .form-control:focus, .form-select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.12);
+        }
+        .btn-submit-gradient {
+            background: linear-gradient(90deg, #1d4ed8 0%, #0284c7 100%) !important;
+            border: none;
+            border-radius: 15px;
+            padding: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2);
+            width: 100%;
+            margin-top: 15px;
+        }
+        .btn-submit-gradient:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
+        }
+        optgroup {
+            font-weight: 700;
+            color: #0f172a;
+            background: #f1f5f9;
+        }
+        optgroup option {
+            font-weight: 400;
+            color: #334155;
+            background: #ffffff;
+        }
+    </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">MBS Repair Center - แอดมิน & ช่างเทคนิค</span>
-    <span class="text-white">แอดมิน: <?php echo $_SESSION['fullname']; ?> | <a href="login.php" class="text-warning text-decoration-none">ออกจากระบบ</a></span>
-</nav>
-<div class="container-fluid py-4">
-    <div class="card shadow-sm border-0">
-        <div class="card-header bg-white py-3 fw-bold text-primary">รายการแจ้งซ่อมและครุภัณฑ์ทั้งหมด</div>
-        <div class="card-body table-responsive">
-            <table class="table table-hover align-middle">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>ผู้แจ้ง / เบอร์</th>
-                        <th>สถานที่</th>
-                        <th>อุปกรณ์</th>
-                        <th>อาการชำรุด</th>
-                        <th>สถานะ</th>
-                        <th>อัปเดตงาน</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while($row = $result->fetch_assoc()): ?>
-                    <tr>
-                        <td>#<?php echo $row['id']; ?></td>
-                        <td><strong><?php echo $row['reporter_name']; ?></strong><br><small><?php echo $row['phone']; ?></small></td>
-                        <td><?php echo $row['building']; ?><br><small class="badge bg-secondary"><?php echo $row['room_number']; ?></small></td>
-                        <td><span class="badge bg-info text-dark"><?php echo $row['device_type']; ?></span></td>
-                        <td><?php echo $row['description']; ?></td>
-                        <td><span class="badge bg-warning text-dark"><?php echo $row['status']; ?></span></td>
-                        <td>
-                            <form action="" method="POST" class="row g-1">
-                                <input type="hidden" name="request_id" value="<?php echo $row['id']; ?>">
-                                <div class="col-8">
-                                    <select name="status" class="form-select form-select-sm">
-                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
-                                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
-                                        <option value="ซ่อมเสร็จสิ้น">ซ่อมเสร็จสิ้น</option>
-                                    </select>
-                                    <input type="number" step="0.01" name="repair_cost" class="form-control form-control-sm mt-1" placeholder="ค่าซ่อม" value="<?php echo $row['repair_cost']; ?>">
-                                    <input type="text" name="technician_notes" class="form-control form-control-sm mt-1" placeholder="หมายเหตุ" value="<?php echo $row['technician_notes']; ?>">
-                                </div>
-                                <div class="col-4">
-                                    <button type="submit" name="update_status" class="btn btn-sm btn-dark w-100 h-100">บันทึก</button>
-                                </div>
-                            </form>
-                        </td>
-                    </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
-        </div>
+
+<div class="mbs-new-box">
+    <div class="mbs-logo-section">
+        <img src="mbs-logo.png" alt="MBS Logo">
+        <h2>MBS REPAIR</h2>
+        <p>ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</p>
     </div>
+
+    <form action="" method="POST">
+        <input type="hidden" name="action" value="repair">
+        <input type="hidden" id="room_type" name="room_type">
+        
+        <div class="mb-3">
+            <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
+            <input type="text" name="reporter_name" class="form-control" placeholder="กรอกชื่อและนามสกุลของคุณ" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">ประเภทผู้แจ้งซ่อม</label>
+            <select name="reporter_role" class="form-select" required>
+                <option value="">-- กรุณาเลือกประเภทผู้ใช้งาน --</option>
+                <option value="บุคลากร">บุคลากร</option>
+                <option value="อาจารย์">อาจารย์</option>
+                <option value="นิสิต">นิสิต</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">หมายเลขโทรศัพท์</label>
+            <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">อาคาร/ห้อง</label>
+            <select name="building_room" id="locationSelect" class="form-select" required>
+                <option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">เลือกประเภทอุปกรณ์</label>
+            <select name="device_type" class="form-select" required>
+                <option value="">-- กรุณาเลือกประเภทอุปกรณ์ --</option>
+                <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+                <option value="เครื่องพิมพ์">เครื่องพิมพ์</option>
+                <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
+                <option value="จอ / ทีวี / โปรเจคเตอร์">จอ / ทีวี / โปรเจคเตอร์</option>
+                <option value="ไมค์ / เครื่องเสียง">ไมค์ / เครื่องเสียง</option>
+                <option value="อื่นๆ">อื่นๆ</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
+            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
+        </div>
+
+        <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
+    </form>
 </div>
+
+<script>
+// ล็อกช่องเบอร์โทรให้พิมพ์ได้เฉพาะตัวเลขเท่านั้น
+document.getElementById('phoneInput').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, '');
+});
+
+// โหลดรายชื่อห้องทั้งหมดและจัดกลุ่มแยกอาคารตามหัวข้ออย่างสวยงาม
+window.addEventListener('DOMContentLoaded', () => {
+    const locationSelect = document.getElementById('locationSelect');
+    
+    fetch('get_rooms.php')
+        .then(response => response.json())
+        .then(data => {
+            // สร้างหัวข้อกลุ่มของอาคาร ACC.BIZ
+            const groupACC = document.createElement('optgroup');
+            groupACC.label = '🏢 อาคาร ACC.BIZ';
+            
+            // สร้างหัวข้อกลุ่มของอาคาร SBS
+            const groupSBS = document.createElement('optgroup');
+            groupSBS.label = '🏢 อาคาร SBS';
+
+            data.forEach(room => {
+                const option = document.createElement('option');
+                option.value = `${room.building}|${room.room_number}|${room.room_type}`;
+                
+                // รูปแบบแสดงผลใน Dropdown: ชื่อห้อง (ประเภทห้อง)
+                option.textContent = `${room.room_number} (${room.room_type})`;
+
+                // แยกห้องโยนเข้ากลุ่มตามประเภทอาคารจริงในฐานข้อมูล
+                if (room.building === 'ตึก ACC.BIZ') {
+                    groupACC.appendChild(option);
+                } else if (room.building === 'ตึก SBS') {
+                    groupSBS.appendChild(option);
+                }
+            });
+
+            // ปล่อยกลุ่มหัวข้อทั้งสองเข้าไปในช่อง Dropdown หลัก
+            locationSelect.appendChild(groupACC);
+            locationSelect.appendChild(groupSBS);
+        })
+        .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
+});
+
+// ตรวจจับค่าประเภทห้องพักซ่อนเก็บไว้ส่งค่าเข้า SQL
+document.getElementById('locationSelect').addEventListener('change', function() {
+    if(this.value) {
+        const parts = this.value.split('|');
+        document.getElementById('room_type').value = parts[2];
+    }
+});
+</script>
 </body>
 </html>
