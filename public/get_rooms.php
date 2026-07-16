@@ -2,7 +2,7 @@
 // public/get_rooms.php
 include '../config.php';
 
-// ดึงข้อมูลห้องทั้งหมดจากทุกตึกมารวมกันเพื่อใส่ใน Dropdown ช่องเดียว
+// ดึงรายชื่อห้องทั้งหมดจากตึก ACC.BIZ และ ตึก SBS ออกมาแสดงพร้อมกัน
 $sql = "SELECT building, room_number, room_type FROM rooms ORDER BY building ASC, room_number ASC";
 $result = $conn->query($sql);
 

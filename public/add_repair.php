@@ -5,11 +5,10 @@ include '../config.php';
 if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['action'] == 'repair')) {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
-    $department = $conn->real_escape_string($_POST['department']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // แยกข้อมูลห้องและอาคารที่ส่งมาจากค่าตัวเลือกเดี่ยว
-    $location_data = explode('|', $_POST['location']);
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown เดียว
+    $location_data = explode('|', $_POST['building_room']);
     $building = $conn->real_escape_string($location_data[0]);
     $room_number = $conn->real_escape_string($location_data[1]);
     $room_type = $conn->real_escape_string($location_data[2]);
@@ -18,16 +17,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $description = $conn->real_escape_string($_POST['description']);
     $line_user_id = "LINE_MBS_" . uniqid(); 
     
+    // ตั้งค่าฟิลด์ที่ไม่ได้ใช้ให้เป็นค่าว่างเพื่อไม่ให้ SQL พัง
+    $department = "";
     $file_name = null;
-    if (isset($_FILES['evidence_file']) && $_FILES['evidence_file']['error'] == 0) {
-        $target_dir = "uploads/";
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0777, true);
-        }
-        $ext = pathinfo($_FILES['evidence_file']['name'], PATHINFO_EXTENSION);
-        $file_name = time() . '_' . uniqid() . '.' . $ext;
-        move_uploaded_file($_FILES['evidence_file']['tmp_name'], $target_dir . $file_name);
-    }
 
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
@@ -44,115 +36,100 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>แจ้งซ่อมออนไลน์ - MBS REPAIR</title>
+    <title>MBS REPAIR - ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #f4f7fc;
+            background: #e0f2fe;
+            background-image: radial-gradient(at 0% 0%, hsla(197,93%,88%,1) 0, transparent 50%), 
+                              radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%);
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
-            color: #4a5568;
+            color: #1e3a8a;
             display: flex;
+            align-items: center;
             justify-content: center;
-            padding: 20px 0;
+            padding: 40px 0;
         }
         .form-container {
             width: 100%;
-            max-width: 450px;
+            max-width: 480px;
             background: #ffffff;
-            border-radius: 30px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
-            padding: 30px 25px;
+            border-radius: 35px;
+            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.1);
+            padding: 40px 30px;
         }
-        .header-title {
+        .logo-box {
             text-align: center;
-            font-size: 15px;
-            font-weight: 600;
-            color: #1e293b;
-            margin-bottom: 25px;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 15px;
+            margin-bottom: 30px;
         }
-        .form-label {
-            font-weight: 500;
-            font-size: 13px;
-            color: #64748b;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
+        .logo-box img {
+            width: 100px;
+            height: 100px;
+            object-fit: contain;
+            margin-bottom: 15px;
         }
-        .form-control, .form-select {
-            border: 1px solid #e2e8f0;
-            border-radius: 15px;
-            padding: 12px 16px;
-            font-size: 14px;
-            background-color: #ffffff;
-            color: #334155;
+        .logo-box h2 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #032b69;
+            margin-bottom: 4px;
         }
-        .form-control::placeholder {
-            color: #94a3b8;
-        }
-        .upload-zone {
-            border: 1px dashed #cbd5e1;
-            border-radius: 20px;
-            padding: 20px;
-            background: #f8fafc;
-        }
-        .btn-upload {
-            background: #ffffff;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            padding: 8px 20px;
+        .logo-box p {
             font-size: 13px;
             color: #2563eb;
             font-weight: 500;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
-        .preview-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
-            margin-top: 15px;
+        .form-label {
+            font-weight: 600;
+            font-size: 14px;
+            color: #032b69;
+            margin-bottom: 8px;
         }
-        .preview-box {
-            aspect-ratio: 1;
-            border-radius: 8px;
-            overflow: hidden;
-            background: #e2e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .form-control, .form-select {
+            border: 1px solid #d1edff;
+            border-radius: 16px;
+            padding: 13px 16px;
+            font-size: 14px;
+            background-color: #f8fafc;
+            color: #334155;
         }
-        .preview-box img, .preview-box video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
+        .form-control:focus, .form-select:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
+            background-color: #fff;
         }
         .btn-submit {
-            background: linear-gradient(90deg, #3b82f6 0%, #06b6d4 100%);
+            background: linear-gradient(90deg, #0256cc 0%, #00a2e8 100%);
             border: none;
-            border-radius: 20px;
+            border-radius: 16px;
             padding: 14px;
-            font-size: 15px;
+            font-size: 16px;
             font-weight: 600;
             color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+            box-shadow: 0 4px 12px rgba(2, 86, 204, 0.2);
+            transition: all 0.2s ease;
             margin-top: 15px;
+        }
+        .btn-submit:hover {
+            opacity: 0.95;
+            transform: translateY(-1px);
         }
     </style>
 </head>
 <body>
 
 <div class="form-container">
-    <div class="header-title">แจ้งซ่อมออนไลน์ - MBS REPAIR</div>
+    <div class="logo-box">
+        <!-- เรียกใช้รูปภาพโลโก้ mbs-logo.png ที่อยู่ในโฟลเดอร์เดียวกับไฟล์นี้โดยตรง -->
+        <img src="mbs-logo.png" alt="MBS Logo">
+        <h2>MBS REPAIR</h2>
+        <p>ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</p>
+    </div>
 
-    <form action="" method="POST" enctype="multipart/form-data">
+    <form action="" method="POST">
         <input type="hidden" name="action" value="repair">
-        <input type="hidden" id="room_type" name="room_type">
         
         <div class="mb-3">
             <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
@@ -170,19 +147,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
         </div>
 
         <div class="mb-3">
-            <label class="form-label">หน่วยงาน / สาขาวิชา</label>
-            <input type="text" name="department" class="form-control" placeholder="เช่น สาขาคอมพิวเตอร์ธุรกิจ / สำนักงานเลขานุการ" required>
-        </div>
-
-        <div class="mb-3">
             <label class="form-label">หมายเลขโทรศัพท์</label>
-            <input type="tel" name="phone" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required pattern="[0-9]{10}">
+            <!-- จำกัดความยาวสูงสุด 10 หลัก และบล็อกไม่ให้พิมพ์เกินทาง JavaScript -->
+            <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
         </div>
 
         <div class="mb-3">
-            <label class="form-label">ห้อง / ภาควิชา / 🏢 สถานที่เกิดปัญหา</label>
-            <select name="location" id="locationSelect" class="form-select" required>
-                <option value="">-- กรุณาเลือกห้องเรียน / สถานที่ --</option>
+            <label class="form-label">อาคาร/ห้อง</label>
+            <select name="building_room" id="locationSelect" class="form-select" required>
+                <option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>
             </select>
         </div>
 
@@ -201,23 +174,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
         <div class="mb-3">
             <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
-            <textarea name="description" class="form-control" rows="3" placeholder="ระบุอาการชำรุด เช่น หน้าจอดับ หรือเครื่องปริ้นกระดาษติด" required></textarea>
-        </div>
-
-        <div class="mb-4">
-            <div class="upload-zone text-center">
-                <label class="form-label justify-content-center">หลักฐานรูปภาพหรือวิดีโอประกอบ</label>
-                <label for="fileInput" class="btn-upload mt-2" style="cursor: pointer;">
-                    📁 คลิกเพื่อเลือกไฟล์แนบ
-                </label>
-                <input type="file" id="fileInput" name="evidence_file" class="d-none" accept="image/*,video/*" onchange="previewMedia(event)">
-                
-                <div class="preview-container">
-                    <div class="preview-box" id="p1"></div>
-                    <div class="preview-box" id="p2"></div>
-                    <div class="preview-box" id="p3"></div>
-                </div>
-            </div>
+            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
         </div>
 
         <button type="submit" class="btn btn-submit w-100">ส่งข้อมูลแจ้งซ่อม</button>
@@ -225,7 +182,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 </div>
 
 <script>
-// โหลดรายชื่อห้องทั้งหมดขึ้นมาแสดงใน Dropdown ช่องเดียวทันทีที่เปิดหน้าเว็บ
+// ควบคุมและบล็อกช่องเบอร์โทรศัพท์ พิมพ์ได้เฉพาะตัวเลข และไม่เกิน 10 หลัก
+document.getElementById('phoneInput').addEventListener('input', function (e) {
+    this.value = this.value.replace(/[^0-9]/g, ''); // ลบอักขระที่ไม่ใช่ตัวเลขออกทันที
+});
+
+// โดลดข้อมูลห้องเรียนทั้งหมดจากตึก ACC.BIZ และ SBS มารวมอยู่ใน Dropdown เดียว
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     fetch('get_rooms.php')
@@ -233,40 +195,14 @@ window.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             data.forEach(room => {
                 const option = document.createElement('option');
-                // รวมข้อมูลส่งแบบมี Format ไปผ่าค่ายิงเข้าฐานข้อมูลหลังบ้าน
                 option.value = `${room.building}|${room.room_number}|${room.room_type}`;
-                option.textContent = `${room.room_number} - ${room.building} (${room.room_type})`;
+                // แสดงผลข้อความในเมนู เช่น ACC.BIZ103 (ตึก ACC.BIZ)
+                option.textContent = `${room.room_number} (${room.building})`;
                 locationSelect.appendChild(option);
             });
-        });
+        })
+        .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
 });
-
-// ดักจับการเลือกสถานที่เพื่อแมปประเภทห้องเข้าตัวแปร Hidden
-document.getElementById('locationSelect').addEventListener('change', function() {
-    if(this.value) {
-        const parts = this.value.split('|');
-        document.getElementById('room_type').value = parts[2];
-    }
-});
-
-// ฟังก์ชันสร้าง Preview รูปภาพ/วิดีโอแบบสด ๆ ทันทีที่ผู้ใช้เลือกไฟล์แนบ
-function previewMedia(event) {
-    const file = event.target.files[0];
-    const p1 = document.getElementById('p1');
-    p1.innerHTML = '';
-    
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            if (file.type.startsWith('image/')) {
-                p1.innerHTML = `<img src="${e.target.result}">`;
-            } else if (file.type.startsWith('video/')) {
-                p1.innerHTML = `<video src="${e.target.result}" controls></video>`;
-            }
-        }
-        reader.readAsDataURL(file);
-    }
-}
 </script>
 </body>
 </html>
