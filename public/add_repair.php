@@ -2,16 +2,23 @@
 // public/add_repair.php
 include '../config.php';
 
-if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['action'] == 'repair')) {
+// แก้ไขเงื่อนไขให้ตรวจสอบเฉพาะเมื่อมีการกด Submit Form (POST) จริงๆ เท่านั้น
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown เพื่อบันทึกลง phpMyAdmin
-    $location_data = explode('|', $_POST['building_room']);
-    $building = $conn->real_escape_string($location_data[0]);
-    $room_number = $conn->real_escape_string($location_data[1]);
-    $room_type = $conn->real_escape_string($location_data[2]);
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown
+    if (!empty($_POST['building_room'])) {
+        $location_data = explode('|', $_POST['building_room']);
+        $building = $conn->real_escape_string($location_data[0]);
+        $room_number = $conn->real_escape_string($location_data[1]);
+        $room_type = $conn->real_escape_string($location_data[2]);
+    } else {
+        $building = "";
+        $room_number = "";
+        $room_type = "";
+    }
     
     $device_type = $conn->real_escape_string($_POST['device_type']);
     $description = $conn->real_escape_string($_POST['description']);
@@ -20,14 +27,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $department = "";
     $file_name = null;
 
-    // บันทึกเข้าตาราง repair_requests (ซึ่งจะไปปรากฏใน phpMyAdmin และฝั่ง Admin/ผู้บริหาร ดึงไปใช้ต่อ)
+    // บันทึกเข้าตารางฐานข้อมูล
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
     if ($conn->query($sql) === TRUE) {
-        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว ข้อมูลถูกบันทึกเข้าฐานข้อมูลเรียบร้อย'); window.location.href='add_repair.php';</script>";
+        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว'); window.location.href='add_repair.php';</script>";
+        exit();
     } else {
-        echo "<script>alert('เกิดข้อผิดพลาด: " . $conn->error . "');</script>";
+        echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $conn->error . "');</script>";
     }
 }
 ?>
@@ -78,20 +86,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             margin-bottom: 15px;
         }
         
-        /* ✨ ปรับข้อความแบบไล่เฉดสีฟ้า (Blue Gradient Text) หรูหราและอ่านง่ายชัดเจน */
+        /* ✨ ปรับข้อความแบบไล่เฉดสีฟ้า รองรับบล็อกกล่องข้อความยาวสระไม่ลอย */
         .mbs-gradient-title {
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             line-height: 1.6;
             margin: 0 auto;
             text-align: center;
-            /* เทคนิคไล่เฉดสีฟ้าบนตัวอักษร */
-            background: linear-gradient(135deg, #0284c7 0%, #0369a1 40%, #075985 100%);
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 50%, #075985 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            /* เพิ่มเงาจางๆ ข้างหลังเพื่อให้ข้อความมิติเด้งออกมา */
-            filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.9));
+            display: block;
         }
         
         .form-label {
