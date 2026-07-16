@@ -17,7 +17,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $description = $conn->real_escape_string($_POST['description']);
     $line_user_id = "LINE_MBS_" . uniqid(); 
     
-    // ตั้งค่าฟิลด์ที่ไม่ได้ใช้ให้เป็นค่าว่างเพื่อไม่ให้ SQL พัง
     $department = "";
     $file_name = null;
 
@@ -36,93 +35,82 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MBS REPAIR - ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</title>
+    <title>แจ้งซ่อมออนไลน์ - MBS REPAIR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #e0f2fe;
-            background-image: radial-gradient(at 0% 0%, hsla(197,93%,88%,1) 0, transparent 50%), 
-                              radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%);
+            background: #f4f7fc !important;
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
-            color: #1e3a8a;
+            color: #4a5568;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 40px 0;
+            padding: 20px 0;
         }
-        .form-container {
+        .mbs-card-container {
             width: 100%;
-            max-width: 480px;
+            max-width: 440px;
             background: #ffffff;
-            border-radius: 35px;
-            box-shadow: 0 20px 40px rgba(14, 165, 233, 0.1);
-            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            padding: 30px 25px;
         }
-        .logo-box {
+        .mbs-logo-header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #f1f5f9;
+            padding-bottom: 20px;
         }
-        .logo-box img {
-            width: 100px;
-            height: 100px;
+        .mbs-logo-header img {
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            margin-bottom: 15px;
+            margin-bottom: 12px;
         }
-        .logo-box h2 {
-            font-size: 22px;
+        .mbs-logo-header h2 {
+            font-size: 20px;
             font-weight: 700;
-            color: #032b69;
-            margin-bottom: 4px;
+            color: #0f172a;
+            margin: 0;
         }
-        .logo-box p {
-            font-size: 13px;
+        .mbs-logo-header p {
+            font-size: 12px;
             color: #2563eb;
-            font-weight: 500;
+            margin: 4px 0 0 0;
         }
         .form-label {
-            font-weight: 600;
-            font-size: 14px;
-            color: #032b69;
+            font-weight: 500;
+            font-size: 13px;
+            color: #64748b;
             margin-bottom: 8px;
         }
         .form-control, .form-select {
-            border: 1px solid #d1edff;
-            border-radius: 16px;
-            padding: 13px 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 15px;
+            padding: 12px 16px;
             font-size: 14px;
-            background-color: #f8fafc;
-            color: #334155;
+            background-color: #ffffff;
         }
-        .form-control:focus, .form-select:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 4px rgba(56, 189, 248, 0.15);
-            background-color: #fff;
-        }
-        .btn-submit {
-            background: linear-gradient(90deg, #0256cc 0%, #00a2e8 100%);
+        .btn-submit-mbs {
+            background: linear-gradient(90deg, #2563eb 0%, #06b6d4 100%);
             border: none;
-            border-radius: 16px;
+            border-radius: 20px;
             padding: 14px;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 600;
             color: white;
-            box-shadow: 0 4px 12px rgba(2, 86, 204, 0.2);
-            transition: all 0.2s ease;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
             margin-top: 15px;
-        }
-        .btn-submit:hover {
-            opacity: 0.95;
-            transform: translateY(-1px);
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
-<div class="form-container">
-    <div class="logo-box">
-        <!-- เรียกใช้รูปภาพโลโก้ mbs-logo.png ที่อยู่ในโฟลเดอร์เดียวกับไฟล์นี้โดยตรง -->
+<div class="mbs-card-container">
+    <div class="mbs-logo-header">
         <img src="mbs-logo.png" alt="MBS Logo">
         <h2>MBS REPAIR</h2>
         <p>ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</p>
@@ -130,6 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
     <form action="" method="POST">
         <input type="hidden" name="action" value="repair">
+        <input type="hidden" id="room_type" name="room_type">
         
         <div class="mb-3">
             <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
@@ -148,7 +137,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
         <div class="mb-3">
             <label class="form-label">หมายเลขโทรศัพท์</label>
-            <!-- จำกัดความยาวสูงสุด 10 หลัก และบล็อกไม่ให้พิมพ์เกินทาง JavaScript -->
             <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
         </div>
 
@@ -174,20 +162,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
         <div class="mb-3">
             <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
-            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
+            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
         </div>
 
-        <button type="submit" class="btn btn-submit w-100">ส่งข้อมูลแจ้งซ่อม</button>
+        <button type="submit" class="btn btn-submit-mbs">ส่งข้อมูลแจ้งซ่อม</button>
     </form>
 </div>
 
 <script>
-// ควบคุมและบล็อกช่องเบอร์โทรศัพท์ พิมพ์ได้เฉพาะตัวเลข และไม่เกิน 10 หลัก
+// ล็อกให้พิมพ์ได้เฉพาะตัวเลขในช่องเบอร์โทร
 document.getElementById('phoneInput').addEventListener('input', function (e) {
-    this.value = this.value.replace(/[^0-9]/g, ''); // ลบอักขระที่ไม่ใช่ตัวเลขออกทันที
+    this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// โดลดข้อมูลห้องเรียนทั้งหมดจากตึก ACC.BIZ และ SBS มารวมอยู่ใน Dropdown เดียว
+// โดลดรายชื่อห้องทั้งหมดขึ้นมาแสดงใน Dropdown เดียว
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     fetch('get_rooms.php')
@@ -196,12 +184,17 @@ window.addEventListener('DOMContentLoaded', () => {
             data.forEach(room => {
                 const option = document.createElement('option');
                 option.value = `${room.building}|${room.room_number}|${room.room_type}`;
-                // แสดงผลข้อความในเมนู เช่น ACC.BIZ103 (ตึก ACC.BIZ)
                 option.textContent = `${room.room_number} (${room.building})`;
                 locationSelect.appendChild(option);
             });
-        })
-        .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
+        });
+});
+
+document.getElementById('locationSelect').addEventListener('change', function() {
+    if(this.value) {
+        const parts = this.value.split('|');
+        document.getElementById('room_type').value = parts[2];
+    }
 });
 </script>
 </body>
