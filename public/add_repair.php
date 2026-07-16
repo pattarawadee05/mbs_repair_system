@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown เพื่อบันทึกลง phpMyAdmin
     $location_data = explode('|', $_POST['building_room']);
     $building = $conn->real_escape_string($location_data[0]);
     $room_number = $conn->real_escape_string($location_data[1]);
@@ -20,11 +20,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $department = "";
     $file_name = null;
 
+    // บันทึกเข้าตาราง repair_requests (ซึ่งจะไปปรากฏใน phpMyAdmin และฝั่ง Admin/ผู้บริหาร ดึงไปใช้ต่อ)
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
     if ($conn->query($sql) === TRUE) {
-        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว'); window.location.href='add_repair.php';</script>";
+        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว ข้อมูลถูกบันทึกเข้าฐานข้อมูลเรียบร้อย'); window.location.href='add_repair.php';</script>";
     } else {
         echo "<script>alert('เกิดข้อผิดพลาด: " . $conn->error . "');</script>";
     }
@@ -40,7 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            /* 💎 เอฟเฟกต์พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
+            /* 💎 พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
             background-color: #e0f2fe !important;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
@@ -77,16 +78,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             margin-bottom: 15px;
         }
         
-        /* ✨ ปรับสีกระชับคำและเพิ่มความสวยงามให้ข้อความยาวตรงตามเงื่อนไขเป๊ะ */
-        .mbs-full-title {
-            font-size: 14.5px;
-            font-weight: 600;
-            color: #0b2545; /* ปรับเป็นสีกรมท่าเข้มประกายมุก สวยคมชัดเจน */
-            line-height: 1.65;
-            margin: 0;
+        /* ✨ ปรับข้อความแบบไล่เฉดสีฟ้า (Blue Gradient Text) หรูหราและอ่านง่ายชัดเจน */
+        .mbs-gradient-title {
+            font-size: 16px;
+            font-weight: 700;
+            line-height: 1.6;
+            margin: 0 auto;
             text-align: center;
-            letter-spacing: 0.1px;
-            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
+            /* เทคนิคไล่เฉดสีฟ้าบนตัวอักษร */
+            background: linear-gradient(135deg, #0284c7 0%, #0369a1 40%, #075985 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            /* เพิ่มเงาจางๆ ข้างหลังเพื่อให้ข้อความมิติเด้งออกมา */
+            filter: drop-shadow(0px 1px 1px rgba(255, 255, 255, 0.9));
         }
         
         .form-label {
@@ -144,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 <div class="mbs-new-box">
     <div class="mbs-logo-section">
         <img src="mbs_logo.png" alt="MBS Logo">
-        <p class="mbs-full-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</p>
+        <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
     </div>
 
     <form action="" method="POST">
