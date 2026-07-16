@@ -7,7 +7,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือกเดี่ยว
+    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown
     $location_data = explode('|', $_POST['building_room']);
     $building = $conn->real_escape_string($location_data[0]);
     $room_number = $conn->real_escape_string($location_data[1]);
@@ -45,6 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
                               radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%) !important;
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
+            color: #1e3a8a;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -116,19 +117,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             opacity: 0.95;
             transform: translateY(-1px);
         }
-        /* ตกแต่งแถวหัวข้อกลุ่มอาคารให้ดูสวย เด่น และอ่านง่าย */
+
+        /* 👑 ไฮไลต์เด็ด: ปรับแต่งสไตล์กลุ่มอาคารและเพิ่มสเปซเยื้องขวาให้รายชื่อห้อง */
         optgroup {
             font-weight: 700 !important;
-            color: #1e3a8a !important;
+            color: #032b69 !important; /* เปลี่ยนเป็นสีกรมท่าเข้มชัดเจน */
             font-style: normal;
-            background: #f8fafc;
-            padding: 5px;
+            background: #f1f5f9; /* ให้แถบหัวข้อมีสีพื้นหลังเทาอ่อนแยกชั้นชัดเจน */
+            padding: 6px 8px !important;
         }
         optgroup option {
             font-weight: 400 !important;
             color: #334155 !important;
             background: #ffffff;
-            padding: 6px 12px;
+            padding: 8px 12px !important;
+            /* สั่งเยื้องข้อความไปทางขวาเพื่อให้หลบแถวหัวข้อตึก ดูเป็นขั้นบันไดสะอาดตา */
+            padding-left: 20px !important; 
         }
     </style>
 </head>
@@ -205,7 +209,6 @@ window.addEventListener('DOMContentLoaded', () => {
     fetch('get_rooms.php')
         .then(response => response.json())
         .then(data => {
-            // ล้างตัวเลือกเก่าออกก่อนเพื่อป้องกันการโหลดซ้ำซ้อน คืนค่าหน้าตาสวยงาม
             locationSelect.innerHTML = '<option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>';
 
             const groupACC = document.createElement('optgroup');
@@ -218,8 +221,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 const option = document.createElement('option');
                 option.value = `${room.building}|${room.room_number}|${room.room_type}`;
                 
-                // แสดงรูปแบบผลลัพธ์ตามบรีฟ: ชื่อห้อง (ประเภทห้อง) เช่น ACC.BIZ301 (Com Lab)
-                option.textContent = `${room.room_number} (${room.room_type})`;
+                // เพื่อความเนียนตาและเยื้องขวาได้ดียิ่งขึ้นบนเบราว์เซอร์บางเวอร์ชัน 
+                // เราจะเพิ่มช่องว่างเว้นวรรค (Non-breaking space) เข้าไปข้างหน้าชื่อห้อง 3 เคาะครับ
+                option.textContent = `\u00A0\u00A0\u00A0${room.room_number} (${room.room_type})`;
 
                 if (room.building === 'ตึก ACC.BIZ') {
                     groupACC.appendChild(option);
@@ -234,7 +238,6 @@ window.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
 });
 
-document.getElementById('building_room');
 document.getElementById('locationSelect').addEventListener('change', function() {
     if(this.value) {
         const parts = this.value.split('|');
