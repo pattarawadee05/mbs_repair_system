@@ -5,7 +5,6 @@ include '../config.php';
 $is_success = false;
 $error_message = "";
 
-// ตรวจสอบการส่งข้อมูลแบบ POST
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
@@ -63,7 +62,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             justify-content: center;
             padding: 40px 0;
             margin: 0;
-            overflow-y: auto !important; /* ป้องกันหน้าจอล็อคเลื่อนไม่ได้ */
+            overflow-y: auto !important;
         }
         .mbs-new-box {
             width: 100%;
@@ -150,7 +149,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 </head>
 <body>
 
-<div class="mbs-new-box">
+<div class="mbs-new-box" id="mainBox">
     <div class="mbs-logo-section" id="topSection">
         <img src="mbs_logo.png" alt="MBS Logo">
         <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
@@ -254,7 +253,6 @@ document.getElementById('locationSelect').addEventListener('change', function() 
     }
 });
 
-// ตรวจสอบสถานะการบันทึกข้อมูลจาก PHP และแสดงผลด้วย SweetAlert2
 <?php if ($is_success): ?>
     Swal.fire({
         icon: 'success',
@@ -263,9 +261,10 @@ document.getElementById('locationSelect').addEventListener('change', function() 
         confirmButtonColor: '#0284c7',
         confirmButtonText: 'ตกลง'
     }).then(() => {
-        // เลื่อนหน้าจอกลับขึ้นไปบนสุด (จุดโลโก้) อัตโนมัติหลังกดตกลง
         document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
-        window.location.href = 'add_repair.php';
+        setTimeout(() => {
+            window.location.href = 'add_repair.php';
+        }, 800);
     });
 <?php elseif (!empty($error_message)): ?>
     Swal.fire({
