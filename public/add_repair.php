@@ -142,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             font-weight: 400 !important;
             color: #334155 !important;
             background: #ffffff;
-            padding: 6px 10px !important;
+            padding: 8px 10px !important;
         }
     </style>
 </head>
@@ -232,9 +232,9 @@ window.addEventListener('DOMContentLoaded', () => {
                 option.value = room.building + '|' + room.room_number + '|' + room.room_type;
                 option.textContent = room.room_number + ' (' + room.room_type + ')';
 
-                if (room.building === 'ตึก ACC.BIZ') {
+                if (room.building === 'ตึก ACC.BIZ' || room.building === 'อาคาร ACC.BIZ') {
                     groupACC.appendChild(option);
-                } else if (room.building === 'ตึก SBS') {
+                } else if (room.building === 'ตึก SBS' || room.building === 'อาคาร SBS') {
                     groupSBS.appendChild(option);
                 }
             });
@@ -252,18 +252,19 @@ document.getElementById('locationSelect').addEventListener('change', function() 
     }
 });
 
+// ดักจับตัวแปรจากฝั่ง PHP เพื่อรันแจ้งเตือน SweetAlert2 ดีไซน์พรีเมียมสีฟ้าสดใส
 <?php if ($is_success): ?>
     Swal.fire({
         icon: 'success',
         title: 'ส่งข้อมูลสำเร็จ!',
-        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้วค่ะ',
+        text: 'ระบบได้บันทึกข้อมูลแจ้งซ่อมเรียบร้อยแล้วค่ะ',
         confirmButtonColor: '#0284c7',
         confirmButtonText: 'ตกลง'
     }).then(() => {
         document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
         setTimeout(() => {
             window.location.href = 'add_repair.php';
-        }, 500);
+        }, 300);
     });
 <?php elseif (!empty($error_message)): ?>
     Swal.fire({
