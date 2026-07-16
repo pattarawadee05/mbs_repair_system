@@ -2,13 +2,15 @@
 // public/add_repair.php
 include '../config.php';
 
-// แก้ไขเงื่อนไขให้ตรวจสอบเฉพาะเมื่อมีการกด Submit Form (POST) จริงๆ เท่านั้น
+$is_success = false;
+$error_message = "";
+
+// ตรวจสอบการส่งข้อมูลแบบ POST
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $phone = $conn->real_escape_string($_POST['phone']);
     
-    // ผ่าแยกข้อมูล อาคาร | ห้อง | ประเภทห้อง จากตัวเลือก Dropdown
     if (!empty($_POST['building_room'])) {
         $location_data = explode('|', $_POST['building_room']);
         $building = $conn->real_escape_string($location_data[0]);
@@ -27,15 +29,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $department = "";
     $file_name = null;
 
-    // บันทึกเข้าตารางฐานข้อมูล
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
     if ($conn->query($sql) === TRUE) {
-        echo "<script>alert('ระบบส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว'); window.location.href='add_repair.php';</script>";
-        exit();
+        $is_success = true;
     } else {
-        echo "<script>alert('เกิดข้อผิดพลาดในการบันทึกข้อมูล: " . $conn->error . "');</script>";
+        $error_message = $conn->error;
     }
 }
 ?>
@@ -47,9 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     <title>แจ้งซ่อมออนไลน์ - MBS REPAIR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body {
-            /* 💎 พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
             background-color: #e0f2fe !important;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
@@ -63,6 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             justify-content: center;
             padding: 40px 0;
             margin: 0;
+            overflow-y: auto !important; /* ป้องกันหน้าจอล็อคเลื่อนไม่ได้ */
         }
         .mbs-new-box {
             width: 100%;
@@ -85,8 +86,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             object-fit: contain;
             margin-bottom: 15px;
         }
-        
-        /* ✨ ปรับข้อความแบบไล่เฉดสีฟ้า รองรับบล็อกกล่องข้อความยาวสระไม่ลอย */
         .mbs-gradient-title {
             font-size: 15px;
             font-weight: 700;
@@ -99,7 +98,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             background-clip: text;
             display: block;
         }
-        
         .form-label {
             font-weight: 600;
             font-size: 13px;
@@ -153,12 +151,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 <body>
 
 <div class="mbs-new-box">
-    <div class="mbs-logo-section">
+    <div class="mbs-logo-section" id="topSection">
         <img src="mbs_logo.png" alt="MBS Logo">
         <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
     </div>
 
-    <form action="" method="POST">
+    <form id="repairForm" action="" method="POST">
         <input type="hidden" name="action" value="repair">
         <input type="hidden" id="room_type" name="room_type">
         
@@ -211,6 +209,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
@@ -254,6 +253,29 @@ document.getElementById('locationSelect').addEventListener('change', function() 
         document.getElementById('room_type').value = parts[2];
     }
 });
+
+// ตรวจสอบสถานะการบันทึกข้อมูลจาก PHP และแสดงผลด้วย SweetAlert2
+<?php if ($is_success): ?>
+    Swal.fire({
+        icon: 'success',
+        title: 'ส่งข้อมูลสำเร็จ!',
+        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว',
+        confirmButtonColor: '#0284c7',
+        confirmButtonText: 'ตกลง'
+    }).then(() => {
+        // เลื่อนหน้าจอกลับขึ้นไปบนสุด (จุดโลโก้) อัตโนมัติหลังกดตกลง
+        document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
+        window.location.href = 'add_repair.php';
+    });
+<?php elseif (!empty($error_message)): ?>
+    Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด!',
+        text: '<?php echo $error_message; ?>',
+        confirmButtonColor: '#d33',
+        confirmButtonText: 'ปิด'
+    });
+<?php endif; ?>
 </script>
 </body>
 </html>
