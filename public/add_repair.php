@@ -142,7 +142,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <div class="mbs-logo-section">
         <img src="mbs-logo.png" alt="MBS Logo">
         <h2>MBS REPAIR</h2>
-        <p>ระบบแจ้งซ่อมครุภัณฑ์ คณะการบัญชีและการจัดการ มมส</p>
+        <p>ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</p>
     </div>
 
     <form action="" method="POST">
