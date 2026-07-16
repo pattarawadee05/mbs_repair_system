@@ -2,7 +2,8 @@
 // public/add_repair.php
 include '../config.php';
 
-if ($_SERVER["METHOD"] == "POST" || isset($_POST['action']) && $_POST['action'] == 'repair') {
+// แก้ไขตรวจสอบค่า METHOD ของ SERVER ให้ถูกต้องป้องกันการส่งค่าล้มเหลว
+if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['action'] == 'repair')) {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
     $department = $conn->real_escape_string($_POST['department']);
@@ -111,14 +112,6 @@ if ($_SERVER["METHOD"] == "POST" || isset($_POST['action']) && $_POST['action'] 
             opacity: 0.9;
             transform: translateY(-1px);
         }
-        .file-upload-box {
-            border: 2px dashed #cbd5e1;
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-            background: #f8fafc;
-            cursor: pointer;
-        }
     </style>
 </head>
 <body>
@@ -145,8 +138,8 @@ if ($_SERVER["METHOD"] == "POST" || isset($_POST['action']) && $_POST['action'] 
                     <option value="">-- กรุณาเลือกประเภทผู้ใช้งาน --</option>
                     <option value="นิสิต">นิสิต</option>
                     <option value="อาจารย์">อาจารย์</option>
-                    <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
                     <option value="บุคลากร">บุคลากร</option>
+                    <option value="เจ้าหน้าที่">เจ้าหน้าที่</option>
                 </select>
             </div>
 
@@ -189,8 +182,8 @@ if ($_SERVER["METHOD"] == "POST" || isset($_POST['action']) && $_POST['action'] 
                     <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
                     <option value="เครื่องพิมพ์">เครื่องพิมพ์</option>
                     <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
-                    <option value="ระบบไฟฟ้า">ระบบไฟฟ้า</option>
-                    <option value="เครือข่าย">เครือข่าย</option>
+                    <option value="ระบบไฟฟ้า">จอ / ทีวี / โปรเจคเตอร์</option>
+                    <option value="เครือข่าย">ไมค์ / เครื่องเสียง</option>
                     <option value="อื่นๆ">อื่นๆ</option>
                 </select>
             </div>

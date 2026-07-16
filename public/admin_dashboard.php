@@ -8,7 +8,6 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] != 'admin') {
     exit();
 }
 
-// อัปเดตสถานะและข้อมูลการซ่อมโดยช่าง
 if (isset($_POST['update_status'])) {
     $id = intval($_POST['request_id']);
     $status = $conn->real_escape_string($_POST['status']);
@@ -34,10 +33,9 @@ $result = $conn->query($sql);
 </head>
 <body>
 <nav class="navbar navbar-dark bg-dark px-4">
-    <span class="navbar-brand">MBS Repair Center - เจ้าหน้าที่เทคนิค</span>
-    <span class="text-white">สวัสดี, <?php echo $_SESSION['fullname']; ?> | <a href="login.php" class="text-warning text-decoration-none">ออกจากระบบ</a></span>
+    <span class="navbar-brand">MBS Repair Center - แอดมิน & ช่างเทคนิค</span>
+    <span class="text-white">แอดมิน: <?php echo $_SESSION['fullname']; ?> | <a href="login.php" class="text-warning text-decoration-none">ออกจากระบบ</a></span>
 </nav>
-
 <div class="container-fluid py-4">
     <div class="card shadow-sm border-0">
         <div class="card-header bg-white py-3 fw-bold text-primary">รายการแจ้งซ่อมและครุภัณฑ์ทั้งหมด</div>
@@ -46,41 +44,34 @@ $result = $conn->query($sql);
                 <thead class="table-light">
                     <tr>
                         <th>ID</th>
-                        <th>ผู้แจ้ง / เบอร์โทร</th>
-                        <th>สถานที่ / ห้อง</th>
+                        <th>ผู้แจ้ง / เบอร์</th>
+                        <th>สถานที่</th>
                         <th>อุปกรณ์</th>
                         <th>อาการชำรุด</th>
-                        <th>สถานะปัจจุบัน</th>
-                        <th>การจัดการ / อัปเดต</th>
+                        <th>สถานะ</th>
+                        <th>อัปเดตงาน</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php while($row = $result->fetch_assoc()): ?>
                     <tr>
                         <td>#<?php echo $row['id']; ?></td>
-                        <td><strong><?php echo $row['reporter_name']; ?></strong><br><small class="text-muted"><?php echo $row['phone']; ?></small></td>
-                        <td><?php echo $row['building']; ?><br><small class="badge bg-secondary"><?php echo $row['room_number']; ?> (<?php echo $row['room_type']; ?>)</small></td>
+                        <td><strong><?php echo $row['reporter_name']; ?></strong><br><small><?php echo $row['phone']; ?></small></td>
+                        <td><?php echo $row['building']; ?><br><small class="badge bg-secondary"><?php echo $row['room_number']; ?></small></td>
                         <td><span class="badge bg-info text-dark"><?php echo $row['device_type']; ?></span></td>
                         <td><?php echo $row['description']; ?></td>
-                        <td>
-                            <?php 
-                            $badge = 'bg-warning';
-                            if($row['status'] == 'กำลังดำเนินการ') $badge = 'bg-primary';
-                            if($row['status'] == 'ซ่อมเสร็จสิ้น') $badge = 'bg-success';
-                            ?>
-                            <span class="badge <?php echo $badge; ?>"><?php echo $row['status']; ?></span>
-                        </td>
+                        <td><span class="badge bg-warning text-dark"><?php echo $row['status']; ?></span></td>
                         <td>
                             <form action="" method="POST" class="row g-1">
                                 <input type="hidden" name="request_id" value="<?php echo $row['id']; ?>">
                                 <div class="col-8">
                                     <select name="status" class="form-select form-select-sm">
-                                        <option value="รอดำเนินการ" <?php if($row['status']=='รอดำเนินการ') echo 'selected'; ?>>รอดำเนินการ</option>
-                                        <option value="กำลังดำเนินการ" <?php if($row['status']=='กำลังดำเนินการ') echo 'selected'; ?>>กำลังดำเนินการ</option>
-                                        <option value="ซ่อมเสร็จสิ้น" <?php if($row['status']=='ซ่อมเสร็จสิ้น') echo 'selected'; ?>>ซ่อมเสร็จสิ้น</option>
+                                        <option value="รอดำเนินการ">รอดำเนินการ</option>
+                                        <option value="กำลังดำเนินการ">กำลังดำเนินการ</option>
+                                        <option value="ซ่อมเสร็จสิ้น">ซ่อมเสร็จสิ้น</option>
                                     </select>
-                                    <input type="number" step="0.01" name="repair_cost" class="form-control form-control-sm mt-1" placeholder="ค่าใช้จ่าย (บาท)" value="<?php echo $row['repair_cost']; ?>">
-                                    <input type="text" name="technician_notes" class="form-control form-control-sm mt-1" placeholder="บันทึกอาการซ่อม" value="<?php echo $row['technician_notes']; ?>">
+                                    <input type="number" step="0.01" name="repair_cost" class="form-control form-control-sm mt-1" placeholder="ค่าซ่อม" value="<?php echo $row['repair_cost']; ?>">
+                                    <input type="text" name="technician_notes" class="form-control form-control-sm mt-1" placeholder="หมายเหตุ" value="<?php echo $row['technician_notes']; ?>">
                                 </div>
                                 <div class="col-4">
                                     <button type="submit" name="update_status" class="btn btn-sm btn-dark w-100 h-100">บันทึก</button>
