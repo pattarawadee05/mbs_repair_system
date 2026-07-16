@@ -144,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             padding: 6px 10px !important;
         }
 
-        /* ✨ ดีไซน์เปลี่ยนโฉมใหม่หมดจดหลังส่งฟอร์มสำเร็จ (Full-Screen Success Mode) */
         .success-container {
             text-align: center;
             padding: 20px 10px;
@@ -276,7 +275,7 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// ส่วนงานดึงข้อมูลจาก get_rooms.php มาร้อยเข้า Dropdown แยกอาคาร
+// ฟังก์ชันดึงห้องอย่างปลอดภัย การันตีข้อมูลแสดงผลครบถ้วน
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     if (!locationSelect) return;
@@ -297,13 +296,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 option.value = room.building + '|' + room.room_number + '|' + room.room_type;
                 option.textContent = room.room_number + ' (' + room.room_type + ')';
 
-                // ดักจับเงื่อนไขข้อความให้ยืดหยุ่น ป้องกัน Dropdown โบ๋
-                if (room.building.includes('ACC.BIZ') || room.building.includes('ACC') || room.building.includes('acc')) {
+                const bName = room.building ? room.building.toString().toUpperCase() : '';
+                if (bName.includes('ACC') || bName.includes('ตึก ACC') || bName.includes('อาคาร ACC')) {
                     groupACC.appendChild(option);
-                } else if (room.building.includes('SBS') || room.building.includes('sbs')) {
+                } else if (bName.includes('SBS') || bName.includes('ตึก SBS') || bName.includes('อาคาร SBS')) {
                     groupSBS.appendChild(option);
                 } else {
-                    groupACC.appendChild(option);
+                    groupACC.appendChild(option); 
                 }
             });
 
@@ -322,7 +321,6 @@ if (document.getElementById('locationSelect')) {
     });
 }
 
-// แสดงข้อผิดพลาดด้วย SweetAlert2 โทนสีแดงเฉพาะตอนข้อมูล SQL มีปัญหาเท่านั้น
 <?php if (!empty($error_message)): ?>
     Swal.fire({
         icon: 'error',
