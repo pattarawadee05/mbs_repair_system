@@ -5,18 +5,25 @@ include '../config.php';
 $is_success = false;
 $error_message = "";
 
-// ตรวจสอบการส่งข้อมูลแบบ POST เฉพาะเมื่อมีการกดปุ่มส่งข้อมูลจริงเท่านั้น
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) &&$_POST['action'] == 'repair') {
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = isset($_POST['reporter_name']) ? $conn->real_escape_string($_POST['reporter_name']) : '';
     $reporter_role = isset($_POST['reporter_role']) ? $conn->real_escape_string($_POST['reporter_role']) : '';
     $phone = isset($_POST['phone']) ? $conn->real_escape_string($_POST['phone']) : '';
     
-    if (!empty($_POST['building_room'])) {$location_data = explode('|', $_POST['building_room']);$building = isset($location_data[0]) ?$conn->real_escape_string($location_data[0]) : '';$room_number = isset($location_data[1]) ?$conn->real_escape_string($location_data[1]) : '';$room_type = isset($location_data[2]) ?$conn->real_escape_string($location_data[2]) : '';     } else {$building = "";
+    if (!empty($_POST['building_room'])) {
+        $location_data = explode('|', $_POST['building_room']);
+        $building = isset($location_data[0]) ? $conn->real_escape_string($location_data[0]) : '';
+        $room_number = isset($location_data[1]) ? $conn->real_escape_string($location_data[1]) : '';
+        $room_type = isset($location_data[2]) ? $conn->real_escape_string($location_data[2]) : '';
+    } else {
+        $building = "";
         $room_number = "";
         $room_type = "";
     }
     
-    $device_type = isset($_POST['device_type']) ?$conn->real_escape_string($_POST['device_type']) : '';$description = isset($_POST['description']) ?$conn->real_escape_string($_POST['description']) : '';$line_user_id = "LINE_MBS_" . uniqid(); 
+    $device_type = isset($_POST['device_type']) ? $conn->real_escape_string($_POST['device_type']) : '';
+    $description = isset($_POST['description']) ? $conn->real_escape_string($_POST['description']) : '';
+    $line_user_id = "LINE_MBS_" . uniqid(); 
     
     $department = "";
     $file_name = null;
@@ -24,9 +31,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) &&$_POST['ac
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
-    if ($conn->query($sql) === TRUE) {$is_success = true;
+    if ($conn->query($sql) === TRUE) {
+        $is_success = true;
     } else {
-        $error_message =$conn->error;
+        $error_message = $conn->error;
     }
 }
 ?>
@@ -41,7 +49,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) &&$_POST['ac
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body {
-            /* 💎 พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
             background-color: #e0f2fe !important;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
@@ -206,7 +213,6 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// ดึงข้อมูลรายชื่อห้องเรียนมาจัดกลุ่มอย่างปลอดภัย
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     
@@ -246,12 +252,28 @@ document.getElementById('locationSelect').addEventListener('change', function() 
     }
 });
 
-// แสดงกล่องแจ้งเตือน SweetAlert2 เมื่อบันทึกสำเร็จ พร้อมเลื่อนหน้าขึ้นไปหาโลโก้ทันที
 <?php if ($is_success): ?>
     Swal.fire({
         icon: 'success',
         title: 'ส่งข้อมูลสำเร็จ!',
-        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเข้าฐานข้อมูลเรียบร้อยแล้วค่ะ',
+        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้วค่ะ',
         confirmButtonColor: '#0284c7',
         confirmButtonText: 'ตกลง'
-    }).
+    }).then(() => {
+        document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
+        setTimeout(() => {
+            window.location.href = 'add_repair.php';
+        }, 500);
+    });
+<?php elseif (!empty($error_message)): ?>
+    Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาด!',
+        text: '<?php echo $error_message; ?>',
+        confirmButtonColor: '#e11d48',
+        confirmButtonText: 'ปิด'
+    });
+<?php endif; ?>
+</script>
+</body>
+</html>
