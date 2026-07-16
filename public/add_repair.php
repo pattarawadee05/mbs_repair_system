@@ -5,6 +5,7 @@ include '../config.php';
 $is_success = false;
 $error_message = "";
 
+// ตรวจสอบการส่งข้อมูลแบบ POST จากฟอร์มแจ้งซ่อม
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
     $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
@@ -28,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $department = "";
     $file_name = null;
 
+    // บันทึกข้อมูลเข้า MySQL (phpMyAdmin) ซึ่งฝั่ง Admin และ ผู้บริหาร จะเห็นข้อมูลนี้ทันที
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
@@ -49,6 +51,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     <link href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css" rel="stylesheet">
     <style>
         body {
+            /* 💎 พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
             background-color: #e0f2fe !important;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
@@ -85,6 +88,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             object-fit: contain;
             margin-bottom: 15px;
         }
+        
+        /* ✨ ข้อความแบบไล่เฉดสีฟ้า (Gradient Text) เป๊ะทุกคำตามเงื่อนไข */
         .mbs-gradient-title {
             font-size: 15px;
             font-weight: 700;
@@ -97,6 +102,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             background-clip: text;
             display: block;
         }
+        
         .form-label {
             font-weight: 600;
             font-size: 13px;
@@ -142,8 +148,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             font-weight: 400 !important;
             color: #334155 !important;
             background: #ffffff;
-            padding: 8px 12px !important;
-            padding-left: 20px !important; 
+            padding: 6px 10px !important;
         }
     </style>
 </head>
@@ -214,6 +219,7 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
+// ดึงข้อมูลห้องจาก get_rooms.php มาแสดงผลในตัวเลือกอย่างปลอดภัย
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     
@@ -230,8 +236,9 @@ window.addEventListener('DOMContentLoaded', () => {
 
             data.forEach(room => {
                 const option = document.createElement('option');
-                option.value = `${room.building}|${room.room_number}|${room.room_type}`;
-                option.textContent = `\u00A0\u00A0\u00A0${room.room_number} (${room.room_type})`;
+                option.value = room.building + '|' + room.room_number + '|' + room.room_type;
+                // แก้ไขการแสดงข้อความให้กระชับ ไม่ใช้ตัวเว้นวรรคยาวเกินไป ป้องกันตัวอักษรหาย
+                option.textContent = room.room_number + ' (' + room.room_type + ')';
 
                 if (room.building === 'ตึก ACC.BIZ') {
                     groupACC.appendChild(option);
@@ -253,6 +260,7 @@ document.getElementById('locationSelect').addEventListener('change', function() 
     }
 });
 
+// แจ้งเตือนเมื่อบันทึกสำเร็จ และเลื่อนหน้าจอขึ้นไปหาโลโก้โดยไม่ล็อกค้าง
 <?php if ($is_success): ?>
     Swal.fire({
         icon: 'success',
@@ -264,7 +272,7 @@ document.getElementById('locationSelect').addEventListener('change', function() 
         document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
         setTimeout(() => {
             window.location.href = 'add_repair.php';
-        }, 800);
+        }, 500);
     });
 <?php elseif (!empty($error_message)): ?>
     Swal.fire({
