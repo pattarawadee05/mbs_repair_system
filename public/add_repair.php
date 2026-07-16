@@ -5,38 +5,28 @@ include '../config.php';
 $is_success = false;
 $error_message = "";
 
-// ตรวจสอบการส่งข้อมูลแบบ POST จากฟอร์มแจ้งซ่อม
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
-    $reporter_name = $conn->real_escape_string($_POST['reporter_name']);
-    $reporter_role = $conn->real_escape_string($_POST['reporter_role']);
-    $phone = $conn->real_escape_string($_POST['phone']);
+// ตรวจสอบการส่งข้อมูลแบบ POST เฉพาะเมื่อมีการกดปุ่มส่งข้อมูลจริงเท่านั้น
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) &&$_POST['action'] == 'repair') {
+    $reporter_name = isset($_POST['reporter_name']) ? $conn->real_escape_string($_POST['reporter_name']) : '';
+    $reporter_role = isset($_POST['reporter_role']) ? $conn->real_escape_string($_POST['reporter_role']) : '';
+    $phone = isset($_POST['phone']) ? $conn->real_escape_string($_POST['phone']) : '';
     
-    if (!empty($_POST['building_room'])) {
-        $location_data = explode('|', $_POST['building_room']);
-        $building = $conn->real_escape_string($location_data[0]);
-        $room_number = $conn->real_escape_string($location_data[1]);
-        $room_type = $conn->real_escape_string($location_data[2]);
-    } else {
-        $building = "";
+    if (!empty($_POST['building_room'])) {$location_data = explode('|', $_POST['building_room']);$building = isset($location_data[0]) ?$conn->real_escape_string($location_data[0]) : '';$room_number = isset($location_data[1]) ?$conn->real_escape_string($location_data[1]) : '';$room_type = isset($location_data[2]) ?$conn->real_escape_string($location_data[2]) : '';     } else {$building = "";
         $room_number = "";
         $room_type = "";
     }
     
-    $device_type = $conn->real_escape_string($_POST['device_type']);
-    $description = $conn->real_escape_string($_POST['description']);
-    $line_user_id = "LINE_MBS_" . uniqid(); 
+    $device_type = isset($_POST['device_type']) ?$conn->real_escape_string($_POST['device_type']) : '';$description = isset($_POST['description']) ?$conn->real_escape_string($_POST['description']) : '';$line_user_id = "LINE_MBS_" . uniqid(); 
     
     $department = "";
     $file_name = null;
 
-    // บันทึกข้อมูลเข้า MySQL (phpMyAdmin) ซึ่งฝั่ง Admin และ ผู้บริหาร จะเห็นข้อมูลนี้ทันที
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
-    if ($conn->query($sql) === TRUE) {
-        $is_success = true;
+    if ($conn->query($sql) === TRUE) {$is_success = true;
     } else {
-        $error_message = $conn->error;
+        $error_message =$conn->error;
     }
 }
 ?>
@@ -88,8 +78,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             object-fit: contain;
             margin-bottom: 15px;
         }
-        
-        /* ✨ ข้อความแบบไล่เฉดสีฟ้า (Gradient Text) เป๊ะทุกคำตามเงื่อนไข */
         .mbs-gradient-title {
             font-size: 15px;
             font-weight: 700;
@@ -102,7 +90,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             background-clip: text;
             display: block;
         }
-        
         .form-label {
             font-weight: 600;
             font-size: 13px;
@@ -160,7 +147,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
     </div>
 
-    <form id="repairForm" action="" method="POST">
+    <form id="repairForm" action="add_repair.php" method="POST">
         <input type="hidden" name="action" value="repair">
         <input type="hidden" id="room_type" name="room_type">
         
@@ -219,7 +206,7 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// ดึงข้อมูลห้องจาก get_rooms.php มาแสดงผลในตัวเลือกอย่างปลอดภัย
+// ดึงข้อมูลรายชื่อห้องเรียนมาจัดกลุ่มอย่างปลอดภัย
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     
@@ -237,7 +224,6 @@ window.addEventListener('DOMContentLoaded', () => {
             data.forEach(room => {
                 const option = document.createElement('option');
                 option.value = room.building + '|' + room.room_number + '|' + room.room_type;
-                // แก้ไขการแสดงข้อความให้กระชับ ไม่ใช้ตัวเว้นวรรคยาวเกินไป ป้องกันตัวอักษรหาย
                 option.textContent = room.room_number + ' (' + room.room_type + ')';
 
                 if (room.building === 'ตึก ACC.BIZ') {
@@ -260,29 +246,12 @@ document.getElementById('locationSelect').addEventListener('change', function() 
     }
 });
 
-// แจ้งเตือนเมื่อบันทึกสำเร็จ และเลื่อนหน้าจอขึ้นไปหาโลโก้โดยไม่ล็อกค้าง
+// แสดงกล่องแจ้งเตือน SweetAlert2 เมื่อบันทึกสำเร็จ พร้อมเลื่อนหน้าขึ้นไปหาโลโก้ทันที
 <?php if ($is_success): ?>
     Swal.fire({
         icon: 'success',
         title: 'ส่งข้อมูลสำเร็จ!',
-        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเรียบร้อยแล้ว',
+        text: 'ระบบได้ส่งข้อมูลแจ้งซ่อมเข้าฐานข้อมูลเรียบร้อยแล้วค่ะ',
         confirmButtonColor: '#0284c7',
         confirmButtonText: 'ตกลง'
-    }).then(() => {
-        document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => {
-            window.location.href = 'add_repair.php';
-        }, 500);
-    });
-<?php elseif (!empty($error_message)): ?>
-    Swal.fire({
-        icon: 'error',
-        title: 'เกิดข้อผิดพลาด!',
-        text: '<?php echo $error_message; ?>',
-        confirmButtonColor: '#d33',
-        confirmButtonText: 'ปิด'
-    });
-<?php endif; ?>
-</script>
-</body>
-</html>
+    }).
