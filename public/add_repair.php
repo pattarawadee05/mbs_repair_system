@@ -62,7 +62,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             justify-content: center;
             padding: 40px 0;
             margin: 0;
-            overflow-y: auto !important;
         }
         .mbs-new-box {
             width: 100%;
@@ -142,69 +141,133 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             font-weight: 400 !important;
             color: #334155 !important;
             background: #ffffff;
-            padding: 8px 10px !important;
+            padding: 6px 10px !important;
+        }
+
+        /* ✨ ดีไซน์เปลี่ยนโฉมใหม่หมดจดหลังส่งฟอร์มสำเร็จ (Full-Screen Success Mode) */
+        .success-container {
+            text-align: center;
+            padding: 20px 10px;
+        }
+        .success-icon-wrapper {
+            width: 100px;
+            height: 100px;
+            background: #f0fdf4;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 25px auto;
+            border: 4px solid #bbf7d0;
+            box-shadow: 0 10px 25px rgba(34, 197, 94, 0.15);
+        }
+        .success-icon-wrapper svg {
+            width: 50px;
+            height: 50px;
+            color: #16a34a;
+        }
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .success-text {
+            font-size: 15px;
+            color: #64748b;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .btn-success-home {
+            background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%) !important;
+            border: none;
+            border-radius: 15px;
+            padding: 14px 30px;
+            font-size: 15px;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
+            text-decoration: none;
+            display: inline-block;
+            width: 100%;
         }
     </style>
 </head>
 <body>
 
 <div class="mbs-new-box" id="mainBox">
-    <div class="mbs-logo-section" id="topSection">
-        <img src="mbs_logo.png" alt="MBS Logo">
-        <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
-    </div>
-
-    <form id="repairForm" action="add_repair.php" method="POST">
-        <input type="hidden" name="action" value="repair">
-        <input type="hidden" id="room_type" name="room_type">
-        
-        <div class="mb-3">
-            <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
-            <input type="text" name="reporter_name" class="form-control" placeholder="กรอกชื่อและนามสกุลของคุณ" required>
+    <?php if ($is_success): ?>
+        <div class="success-container">
+            <div class="success-icon-wrapper">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5" />
+                </svg>
+            </div>
+            <h2 class="success-title">ส่งข้อมูลสำเร็จ!</h2>
+            <p class="success-text">
+                ระบบได้ส่งข้อมูลแจ้งซ่อมเข้าฐานข้อมูลเรียบร้อยแล้ว<br>
+                เจ้าหน้าที่จะเร่งดำเนินการตรวจสอบอุปกรณ์ให้โดยเร็วที่สุดค่ะ
+            </p>
+            <a href="add_repair.php" class="btn-success-home">กลับหน้าหลักเพื่อแจ้งซ่อมเพิ่ม</a>
+        </div>
+    <?php else: ?>
+        <div class="mbs-logo-section" id="topSection">
+            <img src="mbs_logo.png" alt="MBS Logo">
+            <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
         </div>
 
-        <div class="mb-3">
-            <label class="form-label">ประเภทผู้แจ้งซ่อม</label>
-            <select name="reporter_role" class="form-select" required>
-                <option value="">-- กรุณาเลือกประเภทผู้ใช้งาน --</option>
-                <option value="บุคลากร">บุคลากร</option>
-                <option value="อาจารย์">อาจารย์</option>
-                <option value="นิสิต">นิสิต</option>
-            </select>
-        </div>
+        <form id="repairForm" action="add_repair.php" method="POST">
+            <input type="hidden" name="action" value="repair">
+            <input type="hidden" id="room_type" name="room_type">
+            
+            <div class="mb-3">
+                <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
+                <input type="text" name="reporter_name" class="form-control" placeholder="กรอกชื่อและนามสกุลของคุณ" required>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">หมายเลขโทรศัพท์</label>
-            <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
-        </div>
+            <div class="mb-3">
+                <label class="form-label">ประเภทผู้แจ้งซ่อม</label>
+                <select name="reporter_role" class="form-select" required>
+                    <option value="">-- กรุณาเลือกประเภทผู้ใช้งาน --</option>
+                    <option value="บุคลากร">บุคลากร</option>
+                    <option value="อาจารย์">อาจารย์</option>
+                    <option value="นิสิต">นิสิต</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">อาคาร/ห้อง</label>
-            <select name="building_room" id="locationSelect" class="form-select" required>
-                <option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">หมายเลขโทรศัพท์</label>
+                <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">เลือกประเภทอุปกรณ์</label>
-            <select name="device_type" class="form-select" required>
-                <option value="">-- กรุณาเลือกประเภทอุปกรณ์ --</option>
-                <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
-                <option value="เครื่องพิมพ์">เครื่องพิมพ์</option>
-                <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
-                <option value="จอ / ทีวี / โปรเจคเตอร์">จอ / ทีวี / โปรเจคเตอร์</option>
-                <option value="ไมค์ / เครื่องเสียง">ไมค์ / เครื่องเสียง</option>
-                <option value="อื่นๆ">อื่นๆ</option>
-            </select>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">อาคาร/ห้อง</label>
+                <select name="building_room" id="locationSelect" class="form-select" required>
+                    <option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>
+                </select>
+            </div>
 
-        <div class="mb-3">
-            <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
-            <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
-        </div>
+            <div class="mb-3">
+                <label class="form-label">เลือกประเภทอุปกรณ์</label>
+                <select name="device_type" class="form-select" required>
+                    <option value="">-- กรุณาเลือกประเภทอุปกรณ์ --</option>
+                    <option value="คอมพิวเตอร์">คอมพิวเตอร์</option>
+                    <option value="เครื่องพิมพ์">เครื่องพิมพ์</option>
+                    <option value="เครื่องปรับอากาศ">เครื่องปรับอากาศ</option>
+                    <option value="จอ / ทีวี / โปรเจคเตอร์">จอ / ทีวี / โปรเจคเตอร์</option>
+                    <option value="ไมค์ / เครื่องเสียง">ไมค์ / เครื่องเสียง</option>
+                    <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
 
-        <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
-    </form>
+            <div class="mb-3">
+                <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
+                <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
+            </div>
+
+            <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
+        </form>
+    <?php endif; ?>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -213,8 +276,10 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
+// ส่วนงานดึงข้อมูลจาก get_rooms.php มาร้อยเข้า Dropdown แยกอาคาร
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
+    if (!locationSelect) return;
     
     fetch('get_rooms.php')
         .then(response => response.json())
@@ -232,10 +297,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 option.value = room.building + '|' + room.room_number + '|' + room.room_type;
                 option.textContent = room.room_number + ' (' + room.room_type + ')';
 
-                if (room.building === 'ตึก ACC.BIZ' || room.building === 'อาคาร ACC.BIZ') {
+                // ดักจับเงื่อนไขข้อความให้ยืดหยุ่น ป้องกัน Dropdown โบ๋
+                if (room.building.includes('ACC.BIZ') || room.building.includes('ACC') || room.building.includes('acc')) {
                     groupACC.appendChild(option);
-                } else if (room.building === 'ตึก SBS' || room.building === 'อาคาร SBS') {
+                } else if (room.building.includes('SBS') || room.building.includes('sbs')) {
                     groupSBS.appendChild(option);
+                } else {
+                    groupACC.appendChild(option);
                 }
             });
 
@@ -245,28 +313,17 @@ window.addEventListener('DOMContentLoaded', () => {
         .catch(err => console.error("โหลดข้อมูลห้องผิดพลาด:", err));
 });
 
-document.getElementById('locationSelect').addEventListener('change', function() {
-    if(this.value) {
-        const parts = this.value.split('|');
-        document.getElementById('room_type').value = parts[2];
-    }
-});
-
-// ดักจับตัวแปรจากฝั่ง PHP เพื่อรันแจ้งเตือน SweetAlert2 ดีไซน์พรีเมียมสีฟ้าสดใส
-<?php if ($is_success): ?>
-    Swal.fire({
-        icon: 'success',
-        title: 'ส่งข้อมูลสำเร็จ!',
-        text: 'ระบบได้บันทึกข้อมูลแจ้งซ่อมเรียบร้อยแล้วค่ะ',
-        confirmButtonColor: '#0284c7',
-        confirmButtonText: 'ตกลง'
-    }).then(() => {
-        document.getElementById('topSection').scrollIntoView({ behavior: 'smooth' });
-        setTimeout(() => {
-            window.location.href = 'add_repair.php';
-        }, 300);
+if (document.getElementById('locationSelect')) {
+    document.getElementById('locationSelect').addEventListener('change', function() {
+        if(this.value) {
+            const parts = this.value.split('|');
+            document.getElementById('room_type').value = parts[2];
+        }
     });
-<?php elseif (!empty($error_message)): ?>
+}
+
+// แสดงข้อผิดพลาดด้วย SweetAlert2 โทนสีแดงเฉพาะตอนข้อมูล SQL มีปัญหาเท่านั้น
+<?php if (!empty($error_message)): ?>
     Swal.fire({
         icon: 'error',
         title: 'เกิดข้อผิดพลาด!',
