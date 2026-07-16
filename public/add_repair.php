@@ -40,9 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            /* 🎨 ปรับพื้นหลังเป็นสีพาสเทล อุ่น นุ่มนวล ละมุนสายตา */
-            background-color: #f0f7ff !important;
-            background-image: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #faf5ff 100%) !important;
+            /* 💎 เอฟเฟกต์พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
+            background-color: #e0f2fe !important;
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(244, 243, 255, 0.7) 0%, transparent 50%),
+                linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 40%, #e0e7ff 100%) !important;
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
             color: #334155;
@@ -55,10 +58,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
         .mbs-new-box {
             width: 100%;
             max-width: 460px;
-            background: #ffffff !important;
+            background: rgba(255, 255, 255, 0.96) !important;
             border-radius: 30px !important;
-            box-shadow: 0 15px 35px rgba(14, 165, 233, 0.05) !important;
+            box-shadow: 0 20px 50px rgba(14, 165, 233, 0.08) !important;
             padding: 40px 30px !important;
+            border: 1px solid rgba(255, 255, 255, 0.7);
         }
         .mbs-logo-section {
             text-align: center;
@@ -72,14 +76,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             object-fit: contain;
             margin-bottom: 15px;
         }
+        
+        /* ✨ ปรับสีกระชับคำและเพิ่มความสวยงามให้ข้อความยาวตรงตามเงื่อนไขเป๊ะ */
         .mbs-full-title {
-            font-size: 15px;
+            font-size: 14.5px;
             font-weight: 600;
-            color: #032b69; /* สีกรมท่าของสถาบัน */
-            line-height: 1.6;
+            color: #0b2545; /* ปรับเป็นสีกรมท่าเข้มประกายมุก สวยคมชัดเจน */
+            line-height: 1.65;
             margin: 0;
             text-align: center;
+            letter-spacing: 0.1px;
+            text-shadow: 0 1px 1px rgba(255, 255, 255, 0.8);
         }
+        
         .form-label {
             font-weight: 600;
             font-size: 13px;
@@ -116,7 +125,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
         }
         optgroup {
             font-weight: 700 !important;
-            color: #032b69 !important;
+            color: #0b2545 !important;
             font-style: normal;
             background: #f1f5f9;
             padding: 6px 8px !important;
