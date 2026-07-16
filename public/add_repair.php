@@ -40,12 +40,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
-            background: #e0f2fe !important;
-            background-image: radial-gradient(at 0% 0%, hsla(197,93%,88%,1) 0, transparent 50%), 
-                              radial-gradient(at 100% 100%, hsla(204,90%,94%,1) 0, transparent 50%) !important;
+            /* 🎨 ปรับพื้นหลังเป็นสีพาสเทล อุ่น นุ่มนวล ละมุนสายตา */
+            background-color: #f0f7ff !important;
+            background-image: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 50%, #faf5ff 100%) !important;
             min-height: 100vh;
             font-family: 'Sarabun', sans-serif;
-            color: #1e3a8a;
+            color: #334155;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -57,8 +57,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             max-width: 460px;
             background: #ffffff !important;
             border-radius: 30px !important;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
-            padding: 35px 25px !important;
+            box-shadow: 0 15px 35px rgba(14, 165, 233, 0.05) !important;
+            padding: 40px 30px !important;
         }
         .mbs-logo-section {
             text-align: center;
@@ -67,36 +67,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             padding-bottom: 20px;
         }
         .mbs-logo-section img {
-            width: 85px;
-            height: 85px;
+            width: 90px;
+            height: 90px;
             object-fit: contain;
-            margin-bottom: 12px;
+            margin-bottom: 15px;
         }
-        .mbs-main-title {
-            font-size: 19px;
-            font-weight: 700;
-            color: #032b69;
-            margin: 0 0 4px 0;
-            letter-spacing: 0.2px;
-        }
-        .mbs-sub-title {
-            font-size: 12.5px;
-            color: #64748b;
-            font-weight: 400;
-            margin: 0 0 10px 0;
-            line-height: 1.4;
-            padding: 0 10px;
-        }
-        .mbs-faculty-tag {
-            display: inline-block;
-            font-size: 11px;
+        .mbs-full-title {
+            font-size: 15px;
             font-weight: 600;
-            color: #1d4ed8;
-            background-color: #eff6ff;
-            padding: 4px 14px;
-            border-radius: 50px;
-            margin-top: 2px;
-            border: 1px solid #dbeafe;
+            color: #032b69; /* สีกรมท่าของสถาบัน */
+            line-height: 1.6;
+            margin: 0;
+            text-align: center;
         }
         .form-label {
             font-weight: 600;
@@ -153,9 +135,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 <div class="mbs-new-box">
     <div class="mbs-logo-section">
         <img src="mbs_logo.png" alt="MBS Logo">
-        <div class="mbs-main-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์</div>
-        <div class="mbs-sub-title">เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร</div>
-        <div class="mbs-faculty-tag">คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</div>
+        <p class="mbs-full-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</p>
     </div>
 
     <form action="" method="POST">
