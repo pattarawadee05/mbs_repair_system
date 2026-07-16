@@ -37,7 +37,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>แจ้งซ่อมออนไลน์ - MBS REPAIR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
             background: #e0f2fe !important;
@@ -54,7 +54,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
         }
         .mbs-new-box {
             width: 100%;
-            max-width: 450px;
+            max-width: 460px;
             background: #ffffff !important;
             border-radius: 30px !important;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.05) !important;
@@ -63,25 +63,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
         .mbs-logo-section {
             text-align: center;
             margin-bottom: 25px;
-            border-bottom: 1px solid #f1f5f9;
-            padding-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 20px;
         }
         .mbs-logo-section img {
             width: 85px;
             height: 85px;
             object-fit: contain;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
         }
-        .mbs-logo-section h2 {
-            font-size: 20px;
+        .mbs-main-title {
+            font-size: 19px;
             font-weight: 700;
-            color: #0c2340;
-            margin: 0;
+            color: #032b69;
+            margin: 0 0 4px 0;
+            letter-spacing: 0.2px;
         }
-        .mbs-logo-section p {
-            font-size: 12px;
-            color: #2563eb;
-            margin: 4px 0 0 0;
+        .mbs-sub-title {
+            font-size: 12.5px;
+            color: #64748b;
+            font-weight: 400;
+            margin: 0 0 10px 0;
+            line-height: 1.4;
+            padding: 0 10px;
+        }
+        .mbs-faculty-tag {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            color: #1d4ed8;
+            background-color: #eff6ff;
+            padding: 4px 14px;
+            border-radius: 50px;
+            margin-top: 2px;
+            border: 1px solid #dbeafe;
         }
         .form-label {
             font-weight: 600;
@@ -117,13 +132,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             opacity: 0.95;
             transform: translateY(-1px);
         }
-
-        /* 👑 ไฮไลต์เด็ด: ปรับแต่งสไตล์กลุ่มอาคารและเพิ่มสเปซเยื้องขวาให้รายชื่อห้อง */
         optgroup {
             font-weight: 700 !important;
-            color: #032b69 !important; /* เปลี่ยนเป็นสีกรมท่าเข้มชัดเจน */
+            color: #032b69 !important;
             font-style: normal;
-            background: #f1f5f9; /* ให้แถบหัวข้อมีสีพื้นหลังเทาอ่อนแยกชั้นชัดเจน */
+            background: #f1f5f9;
             padding: 6px 8px !important;
         }
         optgroup option {
@@ -131,7 +144,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
             color: #334155 !important;
             background: #ffffff;
             padding: 8px 12px !important;
-            /* สั่งเยื้องข้อความไปทางขวาเพื่อให้หลบแถวหัวข้อตึก ดูเป็นขั้นบันไดสะอาดตา */
             padding-left: 20px !important; 
         }
     </style>
@@ -140,9 +152,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" || (isset($_POST['action']) && $_POST['
 
 <div class="mbs-new-box">
     <div class="mbs-logo-section">
-        <img src="mbs-logo.png" alt="MBS Logo">
-        <h2>MBS REPAIR</h2>
-        <p>ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</p>
+        <img src="mbs_logo.png" alt="MBS Logo">
+        <div class="mbs-main-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์</div>
+        <div class="mbs-sub-title">เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร</div>
+        <div class="mbs-faculty-tag">คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</div>
     </div>
 
     <form action="" method="POST">
@@ -220,9 +233,6 @@ window.addEventListener('DOMContentLoaded', () => {
             data.forEach(room => {
                 const option = document.createElement('option');
                 option.value = `${room.building}|${room.room_number}|${room.room_type}`;
-                
-                // เพื่อความเนียนตาและเยื้องขวาได้ดียิ่งขึ้นบนเบราว์เซอร์บางเวอร์ชัน 
-                // เราจะเพิ่มช่องว่างเว้นวรรค (Non-breaking space) เข้าไปข้างหน้าชื่อห้อง 3 เคาะครับ
                 option.textContent = `\u00A0\u00A0\u00A0${room.room_number} (${room.room_type})`;
 
                 if (room.building === 'ตึก ACC.BIZ') {
