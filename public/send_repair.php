@@ -5,7 +5,7 @@ include '../config.php';
 $is_success = false;
 $error_message = "";
 
-// จัดการบันทึกข้อมูลเข้า phpMyAdmin
+// ตรวจสอบการส่งฟอร์มเพื่อบันทึกข้อมูลเข้า phpMyAdmin
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = isset($_POST['reporter_name']) ? $conn->real_escape_string($_POST['reporter_name']) : '';
     $reporter_role = isset($_POST['reporter_role']) ? $conn->real_escape_string($_POST['reporter_role']) : '';
@@ -29,6 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $department = "";
     $file_name = null;
 
+    // บันทึกเข้าตาราง repair_requests
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
@@ -133,22 +134,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             color: #334155 !important;
             background: #ffffff;
         }
-        /* 🌟 โฉมใหม่เต็มหน้าจอเมื่อกดส่งสำเร็จ (ไม่มีแจ้งเตือนน่าเกลียดเด้ง) */
         .success-display {
             text-align: center;
-            padding: 20px 10px;
+            padding: 30px 10px;
         }
         .success-circle {
-            width: 80px;
-            height: 80px;
-            background: #dcfce7;
-            color: #16a34a;
+            width: 90px;
+            height: 90px;
+            background: #e8f5e9;
+            color: #2e7d32;
             border-radius: 50%;
-            font-size: 40px;
+            font-size: 46px;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px auto;
+            margin: 0 auto 25px auto;
+            box-shadow: 0 10px 20px rgba(46, 125, 50, 0.15);
+            border: 3px solid #a5d6a7;
+        }
+        .success-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1e293b;
+            margin-bottom: 12px;
+        }
+        .success-desc {
+            color: #64748b;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 30px;
+        }
+        .success-meta-info {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 15px;
+            margin-bottom: 30px;
+            font-size: 13px;
+            text-align: left;
+            border: 1px solid #e2e8f0;
+        }
+        .meta-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+        .meta-label { color: #64748b; font-weight: 500; }
+        .meta-value { color: #0f172a; font-weight: 600; }
+        .btn-back-main {
+            background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
+            color: white;
+            text-decoration: none;
+            padding: 14px;
+            border-radius: 15px;
+            font-size: 15px;
+            font-weight: 600;
+            display: block;
+            text-align: center;
         }
     </style>
 </head>
@@ -156,25 +197,40 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
 <div class="mbs-new-box">
     <?php if ($is_success): ?>
+        <!-- หน้าจอ Success ดีไซน์ใหม่เต็มบล็อก -->
         <div class="success-display">
             <div class="success-circle">✓</div>
-            <h2 style="font-weight: 700; color: #1e293b; margin-bottom: 10px;">ส่งข้อมูลสำเร็จแล้ว!</h2>
-            <p style="color: #64748b; font-size: 14px; margin-bottom: 25px;">ระบบได้ทำการบันทึกข้อมูลแจ้งซ่อมเข้าฐานข้อมูลเรียบร้อยค่ะ เจ้าหน้าที่จะรับเรื่องและตรวจสอบอุปกรณ์โดยเร็วที่สุด</p>
-            <a href="send_repair.php" style="background: #0284c7; color: white; text-decoration: none; padding: 12px 25px; border-radius: 12px; font-weight: 600; display: inline-block;">กลับหน้าหลัก</a>
+            <h2 class="success-title">ส่งข้อมูลแจ้งซ่อมสำเร็จ!</h2>
+            <p class="success-desc">
+                ระบบได้นำส่งข้อมูลเข้าฐานข้อมูลหลักเรียบร้อยแล้ว<br>
+                พร้อมเปิดสิทธิ์การเข้าถึงข้อมูลให้ฝั่ง Admin และผู้บริหารแล้วค่ะ
+            </p>
+            <div class="success-meta-info">
+                <div class="meta-item">
+                    <span class="meta-label">สถานะข้อมูล:</span>
+                    <span class="meta-value" style="color: #0284c7;">รอดำเนินการ (Pending)</span>
+                </div>
+                <div class="meta-item">
+                    <span class="meta-label">การนำส่งปลายทาง:</span>
+                    <span class="meta-value" style="color: #16a34a;">phpMyAdmin, Admin, Executive</span>
+                </div>
+            </div>
+            <a href="send_repair.php" class="btn-back-main">กลับสู่หน้าหลัก</a>
         </div>
     <?php else: ?>
+        <!-- ฟอร์มกรอกหน้าหลักปกติ บังคับใช้ method="POST" และกำหนด action ให้ถูกต้อง -->
         <div class="mbs-logo-section">
             <img src="mbs_logo.png" alt="MBS Logo">
             <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
         </div>
 
-        <form action="send_repair.php" method="POST">
+        <form action="send_repair.php" method="POST" id="repairForm">
             <input type="hidden" name="action" value="repair">
             <input type="hidden" id="room_type" name="room_type">
             
             <div class="mb-3">
                 <label class="form-label">ชื่อ-นามสกุล ผู้แจ้งซ่อม</label>
-                <input type="text" name="reporter_name" class="form-control" required>
+                <input type="text" name="reporter_name" class="form-control" placeholder="กรอกชื่อและนามสกุลของคุณ" required>
             </div>
 
             <div class="mb-3">
@@ -189,7 +245,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
             <div class="mb-3">
                 <label class="form-label">หมายเลขโทรศัพท์</label>
-                <input type="text" name="phone" id="phoneInput" class="form-control" required maxlength="10">
+                <input type="text" name="phone" id="phoneInput" class="form-control" placeholder="ระบุเบอร์โทรศัพท์ 10 หลัก" required maxlength="10">
             </div>
 
             <div class="mb-3">
@@ -214,9 +270,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
             <div class="mb-3">
                 <label class="form-label">รายละเอียดปัญหา / อาการชำรุด</label>
-                <textarea name="description" class="form-control" rows="4" required></textarea>
+                <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
             </div>
 
+            <!-- กำหนดประเภทปุ่มเป็น type="submit" ให้ส่งค่าไปยังฐานข้อมูลอย่างถูกต้อง -->
             <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
         </form>
     <?php endif; ?>
@@ -227,7 +284,6 @@ document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
 });
 
-// ดึงรายชื่อห้องทั้งหมดและคัดกรองจัดหมวดหมู่อย่างละเอียด ป้องกัน Dropdown ว่างเปล่า
 window.addEventListener('DOMContentLoaded', () => {
     const locationSelect = document.getElementById('locationSelect');
     if(!locationSelect) return;
@@ -236,10 +292,8 @@ window.addEventListener('DOMContentLoaded', () => {
         .then(res => res.json())
         .then(data => {
             locationSelect.innerHTML = '<option value="">-- กรุณาเลือก อาคาร และ ห้องเรียน --</option>';
-
             const groupACC = document.createElement('optgroup');
             groupACC.label = '🏢 อาคาร ACC.BIZ';
-            
             const groupSBS = document.createElement('optgroup');
             groupSBS.label = '🏢 อาคาร SBS';
 
@@ -248,15 +302,13 @@ window.addEventListener('DOMContentLoaded', () => {
                 option.value = room.building + '|' + room.room_number + '|' + room.room_type;
                 option.textContent = room.room_number + ' (' + room.room_type + ')';
 
-                // ดักจับชื่อตัวอักษรทุกเงื่อนไขเพื่อความแม่นยำสูงสุด
-                const b = room.building.toString();
-                if (b.includes('ACC') || b.includes('acc') || b.includes('การบัญชี')) {
+                const b = room.building.toString().toUpperCase();
+                if (b.includes('ACC') || b.includes('ตึก ACC') || b.includes('อาคาร ACC') || b.includes('การบัญชี')) {
                     groupACC.appendChild(option);
                 } else {
                     groupSBS.appendChild(option);
                 }
             });
-
             locationSelect.appendChild(groupACC);
             locationSelect.appendChild(groupSBS);
         })
@@ -266,11 +318,13 @@ window.addEventListener('DOMContentLoaded', () => {
         });
 });
 
-document.getElementById('locationSelect').addEventListener('change', function() {
-    if(this.value) {
-        document.getElementById('room_type').value = this.value.split('|')[2];
-    }
-});
+if (document.getElementById('locationSelect')) {
+    document.getElementById('locationSelect').addEventListener('change', function() {
+        if(this.value) {
+            document.getElementById('room_type').value = this.value.split('|')[2];
+        }
+    });
+}
 </script>
 </body>
 </html>
