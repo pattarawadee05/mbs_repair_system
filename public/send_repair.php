@@ -2,10 +2,9 @@
 // public/send_repair.php
 include '../config.php';
 
-$is_success = false;
 $error_message = "";
 
-// ตรวจสอบการส่งฟอร์มเพื่อบันทึกข้อมูลเข้า phpMyAdmin
+// ส่วนที่ 1: ตรวจสอบและบันทึกข้อมูลเข้าฐานข้อมูล phpMyAdmin เมื่อมีการกดส่งฟอร์ม (POST)
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'repair') {
     $reporter_name = isset($_POST['reporter_name']) ? $conn->real_escape_string($_POST['reporter_name']) : '';
     $reporter_role = isset($_POST['reporter_role']) ? $conn->real_escape_string($_POST['reporter_role']) : '';
@@ -29,16 +28,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     $department = "";
     $file_name = null;
 
-    // บันทึกเข้าตาราง repair_requests
+    // ทำการ INSERT ลงตาราง repair_requests
     $sql = "INSERT INTO repair_requests (line_user_id, reporter_name, reporter_role, department, phone, building, room_type, room_number, device_type, description, image_before, status) 
             VALUES ('$line_user_id', '$reporter_name', '$reporter_role', '$department', '$phone', '$building', '$room_type', '$room_number', '$device_type', '$description', '$file_name', 'รอดำเนินการ')";
     
     if ($conn->query($sql) === TRUE) {
-        $is_success = true;
+        // [🔥 จุดแก้ไขสำคัญ] บันทึกข้อมูลสำเร็จ สั่ง Redirect หนีทันทีเพื่อล้างแคชเบราว์เซอร์ ป้องกันปัญหารีเฟรชแล้วเด้งหน้าต่างซ้ำซาก
+        header("Location: send_repair.php?success=1");
+        exit();
     } else {
-        $error_message = $conn->error;
+        $error_message = urlencode($conn->error);
+        header("Location: send_repair.php?error=" . $error_message);
+        exit();
     }
 }
+
+// เช็คค่าพารามิเตอร์ success จาก URL หลังจากถูกย้ายหน้ามาแล้ว (GET)
+$is_success = (isset($_GET['success']) && $_GET['success'] == 1) ? true : false;
+$db_error = isset($_GET['error']) ? htmlspecialchars($_GET['error']) : "";
 ?>
 <!DOCTYPE html>
 <html lang="th">
@@ -50,6 +57,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         body {
+            /* 💎 พื้นหลังสีฟ้ามุกวิ้งๆ ละมุนตา สไตล์ Pearl Shimmer */
             background-color: #e0f2fe !important;
             background-image: 
                 radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.6) 0%, transparent 40%),
@@ -134,6 +142,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             color: #334155 !important;
             background: #ffffff;
         }
+        
+        /* 🌟 โฉมใหม่หลังส่งข้อมูลสำเร็จเต็มจอ สวยเฉียบหรูหรา */
         .success-display {
             text-align: center;
             padding: 30px 10px;
@@ -178,8 +188,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             justify-content: space-between;
             margin-bottom: 8px;
         }
+        .meta-item:last-child {
+            margin-bottom: 0;
+        }
         .meta-label { color: #64748b; font-weight: 500; }
         .meta-value { color: #0f172a; font-weight: 600; }
+        
         .btn-back-main {
             background: linear-gradient(90deg, #0284c7 0%, #0369a1 100%);
             color: white;
@@ -190,6 +204,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             font-weight: 600;
             display: block;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(2, 132, 199, 0.2);
         }
     </style>
 </head>
@@ -197,7 +212,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 
 <div class="mbs-new-box">
     <?php if ($is_success): ?>
-        <!-- หน้าจอ Success ดีไซน์ใหม่เต็มบล็อก -->
+        <!-- 🌟 หน้าจอโฉมใหม่หลังจากส่งข้อมูลซ่อมเข้า phpMyAdmin สำเร็จ (รีเฟรชหน้าเท่าไหร่ฟอร์มก็ไม่เด้งซ้ำ) -->
         <div class="success-display">
             <div class="success-circle">✓</div>
             <h2 class="success-title">ส่งข้อมูลแจ้งซ่อมสำเร็จ!</h2>
@@ -215,10 +230,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                     <span class="meta-value" style="color: #16a34a;">phpMyAdmin, Admin, Executive</span>
                 </div>
             </div>
-            <a href="send_repair.php" class="btn-back-main">กลับสู่หน้าหลัก</a>
+            <a href="send_repair.php" class="btn-back-main">กลับสู่หน้าหลักเพื่อแจ้งซ่อมเพิ่ม</a>
         </div>
     <?php else: ?>
-        <!-- ฟอร์มกรอกหน้าหลักปกติ บังคับใช้ method="POST" และกำหนด action ให้ถูกต้อง -->
+        <!-- หน้าจอแบบฟอร์มกรอกข้อมูลตามปกติ -->
         <div class="mbs-logo-section">
             <img src="mbs_logo.png" alt="MBS Logo">
             <h1 class="mbs-gradient-title">ระบบแจ้งซ่อมและติดตามอุปกรณ์เพื่อเพิ่มประสิทธิภาพการบริการและการรายงานสถิติเชิงบริหาร คณะการบัญชีและการจัดการ มหาวิทยาลัยมหาสารคาม</h1>
@@ -273,12 +288,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
                 <textarea name="description" class="form-control" rows="4" placeholder="ระบุอาการชำรุดอย่างละเอียด เช่น หน้าจอดับ หรือแอร์ไม่เย็น" required></textarea>
             </div>
 
-            <!-- กำหนดประเภทปุ่มเป็น type="submit" ให้ส่งค่าไปยังฐานข้อมูลอย่างถูกต้อง -->
             <button type="submit" class="btn btn-submit-gradient">ส่งข้อมูลแจ้งซ่อม</button>
         </form>
     <?php endif; ?>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 document.getElementById('phoneInput').addEventListener('input', function (e) {
     this.value = this.value.replace(/[^0-9]/g, '');
@@ -325,6 +340,17 @@ if (document.getElementById('locationSelect')) {
         }
     });
 }
+
+// หากเกิดข้อผิดพลาดฝั่ง Database แสดงผลให้ผู้ใช้งานเห็นผ่าน SweetAlert2
+<?php if (!empty($db_error)): ?>
+    Swal.fire({
+        icon: 'error',
+        title: 'เกิดข้อผิดพลาดในการบันทึก!',
+        text: '<?php echo $db_error; ?>',
+        confirmButtonColor: '#e11d48',
+        confirmButtonText: 'ปิด'
+    });
+<?php endif; ?>
 </script>
 </body>
 </html>
